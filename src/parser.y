@@ -1,109 +1,553 @@
 %code requires {
   #include <memory>
   #include <string>
+  #include "AST.hpp"
+  #include <vector>
 }
 
 %{
-
 #include <iostream>
 #include <memory>
 #include <string>
+#include "AST.hpp"
 
-// 声明 lexer 函数和错误处理函数
 int yylex();
-void yyerror(std::unique_ptr<std::string> &ast, const char *s);
-
+void yyerror(AST::CompUnit* &Ast, const char *s);
 using namespace std;
-
 %}
 
-// 定义 parser 函数和错误处理函数的附加参数
-// 我们需要返回一个字符串作为 AST, 所以我们把附加参数定义成字符串的智能指针
-// 解析完成后, 我们要手动修改这个参数, 把它设置成解析得到的字符串
-%parse-param { std::unique_ptr<std::string> &ast }
+%parse-param { AST::CompUnit* &Ast }
 
-// yylval 的定义, 我们把它定义成了一个联合体 (union)
-// 因为 token 的值有的是字符串指针, 有的是整数
-// 之前我们在 lexer 中用到的 str_val 和 int_val 就是在这里被定义的
-// 至于为什么要用字符串指针而不直接用 string 或者 unique_ptr<string>?
-// 请自行 STFW 在 union 里写一个带析构函数的类会出现什么情况
 %union {
-  std::string *str_val;
+  std::string* str_val;
   int int_val;
+  float float_val;
+  AST::CompUnit* comp_unit_val;
+  AST::VarDecl* var_decl_val;
+  AST::VarDefList* var_def_list_val;
+  AST::Variable* var_val;
+  AST::ArrayType* arr_val;
+  AST::InitValList* init_val_list_val;
+  AST::Func* func_val;
+  AST::ArgList* arg_list_val;
+  AST::Arg* arg_val;
+  AST::Block* block_val;
+  AST::BlockItem* block_item_val;
+  AST::Stmt* stmt_val;
+  AST::RealArgList* real_arg_list_val;
+  AST::Exp* exp_val;
+  Type type_val;
 }
 
-// lexer 返回的所有 token 种类的声明
-// 注意 IDENT 和 INT_CONST 会返回 token 的值, 分别对应 str_val 和 int_val
-%token INT RETURN
-%token <str_val> IDENT
+%token INT FLOAT VOID RETURN CONST IF ELSE WHILE BREAK CONTINUE NE EQ LE GE AND OR 
+%token <str_val> IDENT PRINTF SCANF STRING
 %token <int_val> INT_CONST
-
-// 非终结符的类型定义
-%type <str_val> FuncDef FuncType Block Stmt Number
+%token<float_val>FLOAT_CONST
+%type<comp_unit_val> CompUnit
+%type<var_decl_val> VarDecl 
+%type<var_def_list_val> VarDefList
+%type<var_val>VarDef LVal 
+%type<arr_val>Exp_Wrap
+%type<init_val_list_val>InitVal InitValList
+%type<func_val>FuncDef
+%type<arg_list_val>FuncFParams
+%type<arg_val>FuncFParam
+%type<block_val>Block BlockItemList
+%type<block_item_val>BlockItem
+%type<stmt_val>Stmt
+%type<exp_val>Exp Cond PrimaryExp  FinalExp Number UnaryExp MulExp AddExp RelExp EqExp LAndExp LOrExp
+%type <real_arg_list_val>FuncRParams
+%type<type_val>BType 
 
 %%
 
-// 开始符, CompUnit ::= FuncDef, 大括号后声明了解析完成后 parser 要做的事情
-// 之前我们定义了 FuncDef 会返回一个 str_val, 也就是字符串指针
-// 而 parser 一旦解析完 CompUnit, 就说明所有的 token 都被解析了, 即解析结束了
-// 此时我们应该把 FuncDef 返回的结果收集起来, 作为 AST 传给调用 parser 的函数
-// $1 指代规则里第一个符号的返回值, 也就是 FuncDef 的返回值
 CompUnit
-  : FuncDef {
-    ast = unique_ptr<string>($1);
-  }
-  ;
+	: FuncDef {
+    auto comp_unit = new AST::CompUnit();
+	$1->unitType=Func;
+    comp_unit->units.push_back($1);
+    Ast =comp_unit;
+	$$=comp_unit;
+    }
+	|VarDecl{
+	auto comp_unit=new AST::CompUnit();
+	$1->unitType=VarDeclare;
+	comp_unit->units.push_back($1);
+	Ast =comp_unit;
+	$$=comp_unit;
+	}
+	|CompUnit FuncDef{
+	$2->unitType=Func;
+	$1->units.push_back($2);
+	Ast =$1;
+	$$=$1;
+	}
+	|CompUnit VarDecl{
+	$2->unitType=VarDeclare;
+	$1->units.push_back($2);
+	Ast =$1;
+	$$=$1;
+	}
+	;
 
-// FuncDef ::= FuncType IDENT '(' ')' Block;
-// 我们这里可以直接写 '(' 和 ')', 因为之前在 lexer 里已经处理了单个字符的情况
-// 解析完成后, 把这些符号的结果收集起来, 然后拼成一个新的字符串, 作为结果返回
-// $$ 表示非终结符的返回值, 我们可以通过给这个符号赋值的方法来返回结果
-// 你可能会问, FuncType, IDENT 之类的结果已经是字符串指针了
-// 为什么还要用 unique_ptr 接住它们, 然后再解引用, 把它们拼成另一个字符串指针呢
-// 因为所有的字符串指针都是我们 new 出来的, new 出来的内存一定要 delete
-// 否则会发生内存泄漏, 而 unique_ptr 这种智能指针可以自动帮我们 delete
-// 虽然此处你看不出用 unique_ptr 和手动 delete 的区别, 但当我们定义了 AST 之后
-// 这种写法会省下很多内存管理的负担
+BType
+	:INT{
+	    Type var_type=Int;
+		$$=var_type;
+	}
+	|FLOAT{
+		Type var_type=Float;
+		$$=var_type;
+	}
+	|VOID{
+		Type var_type=Void;
+		$$=var_type;  
+	}
+	;
+
+VarDecl
+	:BType VarDefList ';'{
+		auto ast=new AST::VarDecl();
+		ast->built_in_type=$1;
+		ast->varDefList=$2;
+		$$=ast;
+	}
+	;
+
+VarDefList
+	:VarDef{
+		auto var_def_list=new AST::VarDefList();
+		var_def_list->varList.push_back($1);
+		$$=var_def_list;
+	}
+	|VarDefList ',' VarDef{
+		$1->varList.push_back($3);
+		$$=$1;
+	}
+	;
+
+VarDef
+	:IDENT{
+		auto ast=new AST::Variable();
+		ast->varName=$1;
+		ast->is_array=false;
+		ast->arr=nullptr;
+		ast->initValList=nullptr;
+		$$=ast;
+	}
+	|IDENT Exp_Wrap{
+		auto ast=new AST::Variable();
+		ast->varName=$1;
+		ast->is_array=true;
+		ast->arr=$2;
+		ast->initValList=nullptr;
+		$$=ast;
+	}
+	|IDENT'='InitVal{
+		auto ast=new AST::Variable();
+		ast->varName=$1;
+		ast->is_array=false;
+		ast->arr=nullptr;
+		ast->initValList=$3;
+		$$=ast;
+	}
+	|IDENT Exp_Wrap '='InitVal{
+		auto ast=new AST::Variable();
+		ast->varName=$1;
+		ast->is_array=true;
+		ast->arr=$2;
+		ast->initValList=$4;
+		$$=ast;
+	}
+	;
+
+Exp_Wrap
+	:'[' Exp ']'{
+		auto ast=new AST::ArrayType();
+		ast->len.push_back(static_cast<AST::ConstNumber*>($2));
+		$$=ast;
+	}
+	|'[' Exp ']' Exp_Wrap{
+		$4->len.insert(static_cast<AST::ArrayType*>($4)->len.begin(),static_cast<AST::ConstNumber*>($2));
+		$$=$4;
+	}
+	;
+
+InitVal
+	:Exp{
+		auto ast=new AST::InitValList();
+		ast->valList.push_back($1);
+		$$=ast;
+	}
+	|'{' InitValList '}'{$$=$2;}
+	;
+
+
+InitValList 
+	:Exp{
+		auto ast=new AST::InitValList();
+		ast->valList.push_back($1);
+		$$=ast;
+	}
+	|InitValList ',' Exp{
+		$1->valList.push_back($3);
+		$$=$1;
+	}
+	;
+
 FuncDef
-  : FuncType IDENT '(' ')' Block {
-    auto type = unique_ptr<string>($1);
-    auto ident = unique_ptr<string>($2);
-    auto block = unique_ptr<string>($5);
-    $$ = new string(*type + " " + *ident + "() " + *block);
+  : BType IDENT '(' ')' Block {
+    auto func = new AST::Func();
+    func->funcType = $1;
+	func->funcName=$2;
+	func->argList=nullptr;
+	func->funcBody = $5;
+    $$ = func;
+  }
+  |BType IDENT '('FuncFParams ')' Block{
+	auto func = new AST::Func();
+    func->funcType = $1;
+	func->funcName=$2;
+	func->argList=$4;
+	func->funcBody = $6;
+    $$ = func;
   }
   ;
 
-// 同上, 不再解释
-FuncType
-  : INT {
-    $$ = new string("int");
-  }
-  ;
+FuncFParams
+	:FuncFParam{
+		auto ast= new AST::ArgList();
+	    ast->args.push_back($1);
+		$$=ast;
+	}
+	|FuncFParams ',' FuncFParam{
+		$1->args.push_back($3);
+		$$=$1;
+	}
+	;
+	
+FuncFParam
+	:BType IDENT {
+		auto ast=new AST::Arg();
+		ast->argName=$2;
+		ast->bType=$1;
+		ast->is_pointer=false;
+		$$=ast;
+	}
+	|BType IDENT '[' ']'{
+		auto ast=new AST::Arg();
+		ast->argName=$2;
+		ast->bType=$1;
+		ast->is_pointer=true;
+		$$=ast;
+	}
+	|BType IDENT '[' ']' Exp_Wrap{}
+	;
 
 Block
-  : '{' Stmt '}' {
-    auto stmt = unique_ptr<string>($2);
-    $$ = new string("{ " + *stmt + " }");
+  : '{' BlockItemList '}' {
+    $$=$2;
   }
   ;
-
+  
+BlockItemList
+	:BlockItem{
+		auto ast=new AST::Block();
+		ast->itemList.push_back($1);
+		$$=ast;
+	}
+	|BlockItemList BlockItem{
+		$1->itemList.push_back($2);
+		$$=$1;
+	}
+	;
+	
+BlockItem
+	:VarDecl{$1->itemType=Decl;$$=$1;}
+	|Stmt{$1->itemType=Stmt;$$=$1;}
+	;
+	
 Stmt
-  : RETURN Number ';' {
-    auto number = unique_ptr<string>($2);
-    $$ = new string("return " + *number + ";");
-  }
+	:LVal '=' Exp ';'{
+		auto ast=new AST::AssignStmt();
+		ast->stmtType=assignStmt;
+		ast->lVal=$1;
+		ast->rVal=$3;
+		$$=ast;
+	}
+	|Exp ';'{$1->stmtType=expStmt;$$=$1;}
+	|Block{$1->stmtType=blockStmt;$$=$1;}
+	|IF '(' Cond ')' Stmt{
+		auto ast=new AST::IfStmt();
+		ast->stmtType=ifStmt;
+		ast->condition=$3;
+		ast->ifBlock=$5;
+		ast->elseBlock=nullptr;
+		$$=ast;
+	}
+	|IF '(' Cond ')' Stmt ELSE Stmt{
+		auto ast=new AST::IfStmt();
+		ast->stmtType=ifStmt;
+		ast->condition=$3;
+		ast->ifBlock=$5;
+		ast->elseBlock=$7;
+		$$=ast;
+	}
+	|WHILE '(' Cond ')' Stmt{
+		auto ast=new AST::WhileStmt();
+		ast->stmtType=whileStmt;
+		ast->condition=$3;
+		ast->loopBlock=$5;
+		$$=ast;
+	}
+	|BREAK ';'{
+		auto ast=new AST::Stmt();
+		ast->stmtType=breakStmt;
+		$$=ast;
+	}
+	|CONTINUE ';'{
+		auto ast=new AST::Stmt();
+		ast->stmtType=continueStmt;
+		$$=ast;
+	}
+	|RETURN Exp ';'{
+		auto ast=new AST::ReturnStmt();
+		ast->stmtType=returnStmt;
+		ast->retVal=$2;
+		$$=ast;
+	}
+	|RETURN ';' {
+		auto ast=new AST::ReturnStmt();
+		ast->stmtType=returnStmt;
+		ast->retVal=nullptr;
+		$$=ast;
+	}
   ;
+  
+Exp:AddExp{$$=$1;};
+
+Cond:LOrExp{$$=$1;};
+
+LVal
+	:IDENT{
+		auto ast=new AST::Variable();
+		ast->varName=$1;
+		ast->is_array=false;
+		ast->arr=nullptr;
+		ast->initValList=nullptr;
+		$$=ast;
+	}
+	|IDENT Exp_Wrap{
+		auto ast=new AST::Variable();
+		ast->varName=$1;
+		ast->is_array=true;
+		ast->arr=$2;
+		ast->initValList=nullptr;
+		$$=ast;
+	}
+	;
+	
+PrimaryExp
+	:FinalExp{$1->expType=finalExp;$$=$1;}
+	|LVal{$1->expType=lValExp;$$=$1;}
+	|Number{$1->expType=constNumExp;$$=$1;}
+	;
+
+FinalExp
+	:'(' Exp ')'{
+		auto ast=new AST::FinalExp();
+		ast->iExp=$2;
+		$$=ast;
+	}
+	;
 
 Number
   : INT_CONST {
-    $$ = new string(to_string($1));
+	  auto ast=new AST::ConstNumber();
+	  ast->constType=Int;
+	  ast->val=$1;
+	  $$=ast;
+  }
+  | FLOAT_CONST {
+	  auto ast=new AST::ConstNumber();
+	  ast->constType=Float;
+	  ast->val=$1;
+	  $$=ast;
   }
   ;
 
+UnaryExp
+	:PrimaryExp{$$=$1;}
+	|IDENT '(' ')'{
+		auto ast=new AST::FuncCall();
+		ast->expType=funcCall;
+		ast->funcName=$1;
+		ast->realArgList=nullptr;
+		ast->IO=nullptr;
+		$$=ast;
+		
+	}
+	|IDENT '(' FuncRParams ')'{
+		auto ast=new AST::FuncCall();
+		ast->expType=funcCall;
+		ast->funcName=$1;
+		ast->realArgList=$3;
+		ast->IO=nullptr;
+		$$=ast;
+	}
+	|UnaryOp UnaryExp {}
+	| PRINTF '(' STRING ')' ';'{
+		auto ast=new AST::FuncCall();
+		ast->expType=funcCall;
+		ast->funcName=$1;
+		ast->realArgList=nullptr;
+		ast->IO=$3;
+		$$=ast;
+	}
+	|PRINTF '(' STRING ',' FuncRParams ')' ';'{
+		auto ast=new AST::FuncCall();
+		ast->expType=funcCall;
+		ast->funcName=$1;
+		ast->realArgList=$5;
+		ast->IO=$3;
+		$$=ast;
+	}
+	;
+
+UnaryOp
+	:'-'{}
+	|'+'{}
+	|'!'{}
+	;
+	
+FuncRParams
+	:Exp{
+		auto ast=new AST::RealArgList();
+		ast->realArgs.push_back($1);
+		$$=ast;
+	}
+	|FuncRParams ',' Exp{
+		$1->realArgs.push_back($3);
+		$$=$1;
+	}
+	;
+
+MulExp
+	:UnaryExp{$$=$1;}
+	|MulExp '*' UnaryExp{
+		auto ast=new AST::BinaryExp();
+		ast->expType=mulExp;
+		ast->lExp=$1;
+		ast->rExp=$3;
+		$$=ast;
+	}
+	|MulExp '/' UnaryExp{
+		auto ast=new AST::BinaryExp();
+		ast->expType=divExp;
+		ast->lExp=$1;
+		ast->rExp=$3;
+		$$=ast;
+	}
+	|MulExp '%' UnaryExp{
+		auto ast=new AST::BinaryExp();
+		ast->expType=modExp;
+		ast->lExp=$1;
+		ast->rExp=$3;
+		$$=ast;
+	}
+	;
+	
+AddExp
+	:MulExp{$$=$1;}
+	|AddExp '+' MulExp{
+		auto ast=new AST::BinaryExp();
+		ast->expType=addExp;
+		ast->lExp=$1;
+		ast->rExp=$3;
+		$$=ast;
+	}
+	|AddExp '-' MulExp{
+		auto ast=new AST::BinaryExp();
+		ast->expType=subExp;
+		ast->lExp=$1;
+		ast->rExp=$3;
+		$$=ast;
+	}
+	;
+	
+RelExp
+	:AddExp{$$=$1;}
+	|RelExp '<' AddExp{
+		auto ast=new AST::BinaryExp();
+		ast->expType=LTexp;
+		ast->lExp=$1;
+		ast->rExp=$3;
+		$$=ast;
+	}
+	|RelExp '>' AddExp{
+		auto ast=new AST::BinaryExp();
+		ast->expType=GTexp;
+		ast->lExp=$1;
+		ast->rExp=$3;
+		$$=ast;
+	}
+	|RelExp LE AddExp{
+		auto ast=new AST::BinaryExp();
+		ast->expType=LEexp;
+		ast->lExp=$1;
+		ast->rExp=$3;
+		$$=ast;
+	}
+	|RelExp GE AddExp{
+		auto ast=new AST::BinaryExp();
+		ast->expType=GEexp;
+		ast->lExp=$1;
+		ast->rExp=$3;
+		$$=ast;
+	}
+	;
+	
+EqExp
+	:RelExp{$$=$1;}
+	|EqExp EQ RelExp{
+		auto ast=new AST::BinaryExp();
+		ast->expType=EQexp;
+		ast->lExp=$1;
+		ast->rExp=$3;
+		$$=ast;
+	}
+	|EqExp NE RelExp{
+		auto ast=new AST::BinaryExp();
+		ast->expType=NEexp;
+		ast->lExp=$1;
+		ast->rExp=$3;
+		$$=ast;
+	}
+	;
+	
+LAndExp
+	:EqExp{$$=$1;}
+	| LAndExp AND EqExp{
+		auto ast=new AST::BinaryExp();
+		ast->expType=lAndExp;
+		ast->lExp=$1;
+		ast->rExp=$3;
+		$$=ast;
+	}
+	;
+	
+LOrExp
+	:LAndExp{$$=$1;}
+	|LOrExp OR LAndExp{
+		auto ast=new AST::BinaryExp();
+		ast->expType=lOrExp;
+		ast->lExp=$1;
+		ast->rExp=$3;
+		$$=ast;
+	}
+	;
 %%
 
-// 定义错误处理函数, 其中第二个参数是错误信息
-// parser 如果发生错误 (例如输入的程序出现了语法错误), 就会调用这个函数
-void yyerror(unique_ptr<string> &ast, const char *s) {
+void yyerror(AST::CompUnit* &Ast , const char *s) {
   cerr << "error: " << s << endl;
 }

@@ -39,11 +39,13 @@
 
   #include <memory>
   #include <string>
+  #include "AST.hpp"
+  #include <vector>
 
 
 
 /* Line 1676 of yacc.c  */
-#line 47 "C:/course/Compiler/myCompiler/src/parser.tab.hpp"
+#line 49 "C:/course/Compiler/myCompiler/src/parser.tab.hpp"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -52,9 +54,27 @@
       know about them.  */
    enum yytokentype {
      INT = 258,
-     RETURN = 259,
-     IDENT = 260,
-     INT_CONST = 261
+     FLOAT = 259,
+     VOID = 260,
+     RETURN = 261,
+     CONST = 262,
+     IF = 263,
+     ELSE = 264,
+     WHILE = 265,
+     BREAK = 266,
+     CONTINUE = 267,
+     NE = 268,
+     EQ = 269,
+     LE = 270,
+     GE = 271,
+     AND = 272,
+     OR = 273,
+     IDENT = 274,
+     PRINTF = 275,
+     SCANF = 276,
+     STRING = 277,
+     INT_CONST = 278,
+     FLOAT_CONST = 279
    };
 #endif
 
@@ -65,15 +85,31 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 30 "src/parser.y"
+#line 21 "src/parser.y"
 
-  std::string *str_val;
+  std::string* str_val;
   int int_val;
+  float float_val;
+  AST::CompUnit* comp_unit_val;
+  AST::VarDecl* var_decl_val;
+  AST::VarDefList* var_def_list_val;
+  AST::Variable* var_val;
+  AST::ArrayType* arr_val;
+  AST::InitValList* init_val_list_val;
+  AST::Func* func_val;
+  AST::ArgList* arg_list_val;
+  AST::Arg* arg_val;
+  AST::Block* block_val;
+  AST::BlockItem* block_item_val;
+  AST::Stmt* stmt_val;
+  AST::RealArgList* real_arg_list_val;
+  AST::Exp* exp_val;
+  Type type_val;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 77 "C:/course/Compiler/myCompiler/src/parser.tab.hpp"
+#line 113 "C:/course/Compiler/myCompiler/src/parser.tab.hpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

@@ -17,7 +17,7 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # all of C/C++ source files
-file(GLOB_RECURSE CXX_SOURCES "src/*.cpp")
+file(GLOB_RECURSE CXX_SOURCES "src/*.cpp" "src/.*hpp")
 set(SOURCES  ${CXX_SOURCES} 
             ${FLEX_Lexer_OUTPUTS} ${BISON_Parser_OUTPUT_SOURCE})
 

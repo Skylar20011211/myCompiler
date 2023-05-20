@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <fstream>
+#include"AST.hpp"
 
 using namespace std;
 
@@ -14,7 +15,7 @@ using namespace std;
 // 看起来会很烦人, 于是干脆采用这种看起来 dirty 但实际很有效的手段
 
 extern FILE* yyin;
-extern int yyparse(std::unique_ptr<std::string>& ast);
+extern int yyparse(AST::CompUnit* & Ast);
 
 
 int main(int argc, const char* argv[]) {
@@ -30,21 +31,17 @@ int main(int argc, const char* argv[]) {
 	auto input = argv[2];
 	auto output = argv[4];
 
-
-	
-
-	// 打开输入文件, 并且指定 lexer 在解析的时候读取这个文件
+  // 打开输入文件, 并且指定 lexer 在解析的时候读取这个文件
 	yyin = fopen(input, "r");
 	assert(yyin);
 
 	// 调用 parser 函数, parser 函数会进一步调用 lexer 解析输入文件的
-	unique_ptr<string> ast;
-	auto ret = yyparse(ast);
+	AST::CompUnit* Ast;
+	auto ret = yyparse(Ast);
 	assert(!ret);
 
 	// 输出解析得到的 AST, 其实就是个字符串
-	cout << *ast << endl;
-	
+	Ast->Dump();
 
 }
 
