@@ -69,9 +69,9 @@
      GE = 271,
      AND = 272,
      OR = 273,
-     IDENT = 274,
-     PRINTF = 275,
-     SCANF = 276,
+     PRINTF = 274,
+     SCANF = 275,
+     IDENT = 276,
      STRING = 277,
      INT_CONST = 278,
      FLOAT_CONST = 279
@@ -91,8 +91,6 @@ typedef union YYSTYPE
   int int_val;
   float float_val;
   AST::CompUnit* comp_unit_val;
-  AST::VarDecl* var_decl_val;
-  AST::VarDefList* var_def_list_val;
   AST::Variable* var_val;
   AST::ArrayType* arr_val;
   AST::InitValList* init_val_list_val;
@@ -109,7 +107,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 113 "C:/course/Compiler/myCompiler/src/parser.tab.hpp"
+#line 111 "C:/course/Compiler/myCompiler/src/parser.tab.hpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

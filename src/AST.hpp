@@ -100,25 +100,14 @@ namespace AST {
 	};
 
 
-	class VarDecl : public BlockItem ,public Unit {
-	public:
-		Type built_in_type;
-		VarDefList* varDefList;
-		void Dump() const override;
-	};
-
-	class Variable :public Exp {
+	class Variable :public Exp, public Unit {
 	public:
 		std::string* varName;
 		bool is_array;
+		Type bType;
 		ArrayType* arr;
 		InitValList* initValList;
 		void Dump() const override;
-	};
-
-	class VarDefList :public Variable {
-	public:
-		std::vector<Variable*> varList;
 	};
 
 	class ConstNumber :public Exp {
@@ -130,7 +119,7 @@ namespace AST {
 
 	class ArrayType : public ConstNumber {
 	public:
-		std::vector<ConstNumber*> len;
+		std::vector<Exp*> len;
 	};
 
 	class InitValList :public Exp {
@@ -185,7 +174,7 @@ namespace AST {
 	class ReturnStmt :public Stmt {
 	public:
 		Exp* retVal;
-		void Dump() const override;
+		void Dump() const;
 	};
 	
 	class FinalExp :public Exp {

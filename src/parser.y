@@ -23,8 +23,6 @@ using namespace std;
   int int_val;
   float float_val;
   AST::CompUnit* comp_unit_val;
-  AST::VarDecl* var_decl_val;
-  AST::VarDefList* var_def_list_val;
   AST::Variable* var_val;
   AST::ArrayType* arr_val;
   AST::InitValList* init_val_list_val;
@@ -39,14 +37,12 @@ using namespace std;
   Type type_val;
 }
 
-%token INT FLOAT VOID RETURN CONST IF ELSE WHILE BREAK CONTINUE NE EQ LE GE AND OR 
-%token <str_val> IDENT PRINTF SCANF STRING
+%token INT FLOAT VOID RETURN CONST IF ELSE WHILE BREAK CONTINUE NE EQ LE GE AND OR PRINTF SCANF
+%token <str_val> IDENT STRING
 %token <int_val> INT_CONST
 %token<float_val>FLOAT_CONST
 %type<comp_unit_val> CompUnit
-%type<var_decl_val> VarDecl 
-%type<var_def_list_val> VarDefList
-%type<var_val>VarDef LVal 
+%type<var_val>VarDef LVal  VarDecl
 %type<arr_val>Exp_Wrap
 %type<init_val_list_val>InitVal InitValList
 %type<func_val>FuncDef
@@ -106,57 +102,46 @@ BType
 	;
 
 VarDecl
-	:BType VarDefList ';'{
-		auto ast=new AST::VarDecl();
-		ast->built_in_type=$1;
-		ast->varDefList=$2;
-		$$=ast;
-	}
-	;
-
-VarDefList
-	:VarDef{
-		auto var_def_list=new AST::VarDefList();
-		var_def_list->varList.push_back($1);
-		$$=var_def_list;
-	}
-	|VarDefList ',' VarDef{
-		$1->varList.push_back($3);
+	:VarDef ';'{
 		$$=$1;
 	}
 	;
 
 VarDef
-	:IDENT{
+	:BType IDENT{
 		auto ast=new AST::Variable();
-		ast->varName=$1;
+		ast->bType=$1;
+		ast->varName=$2;
 		ast->is_array=false;
 		ast->arr=nullptr;
 		ast->initValList=nullptr;
 		$$=ast;
 	}
-	|IDENT Exp_Wrap{
+	|BType IDENT Exp_Wrap{
 		auto ast=new AST::Variable();
-		ast->varName=$1;
+		ast->bType=$1;
+		ast->varName=$2;
 		ast->is_array=true;
-		ast->arr=$2;
+		ast->arr=$3;
 		ast->initValList=nullptr;
 		$$=ast;
 	}
-	|IDENT'='InitVal{
+	|BType IDENT'='InitVal{
 		auto ast=new AST::Variable();
-		ast->varName=$1;
+		ast->bType=$1;
+		ast->varName=$2;
 		ast->is_array=false;
 		ast->arr=nullptr;
-		ast->initValList=$3;
-		$$=ast;
-	}
-	|IDENT Exp_Wrap '='InitVal{
-		auto ast=new AST::Variable();
-		ast->varName=$1;
-		ast->is_array=true;
-		ast->arr=$2;
 		ast->initValList=$4;
+		$$=ast;
+	}
+	|BType IDENT Exp_Wrap '='InitVal{
+		auto ast=new AST::Variable();
+		ast->bType=$1;
+		ast->varName=$2;
+		ast->is_array=true;
+		ast->arr=$3;
+		ast->initValList=$5;
 		$$=ast;
 	}
 	;
@@ -164,11 +149,11 @@ VarDef
 Exp_Wrap
 	:'[' Exp ']'{
 		auto ast=new AST::ArrayType();
-		ast->len.push_back(static_cast<AST::ConstNumber*>($2));
+		ast->len.push_back($2);
 		$$=ast;
 	}
 	|'[' Exp ']' Exp_Wrap{
-		$4->len.insert(static_cast<AST::ArrayType*>($4)->len.begin(),static_cast<AST::ConstNumber*>($2));
+		$4->len.insert($4->len.begin(),$2);
 		$$=$4;
 	}
 	;
@@ -378,6 +363,7 @@ Number
 
 UnaryExp
 	:PrimaryExp{$$=$1;}
+
 	|IDENT '(' ')'{
 		auto ast=new AST::FuncCall();
 		ast->expType=funcCall;
@@ -395,23 +381,41 @@ UnaryExp
 		ast->IO=nullptr;
 		$$=ast;
 	}
-	|UnaryOp UnaryExp {}
-	| PRINTF '(' STRING ')' ';'{
+	|PRINTF '(' STRING ')' {
 		auto ast=new AST::FuncCall();
 		ast->expType=funcCall;
-		ast->funcName=$1;
+		ast->funcName=new string("printf");
 		ast->realArgList=nullptr;
 		ast->IO=$3;
 		$$=ast;
+	
 	}
-	|PRINTF '(' STRING ',' FuncRParams ')' ';'{
+	|PRINTF '(' STRING ',' FuncRParams ')'{
 		auto ast=new AST::FuncCall();
 		ast->expType=funcCall;
-		ast->funcName=$1;
+		ast->funcName=new string("printf");
 		ast->realArgList=$5;
 		ast->IO=$3;
 		$$=ast;
 	}
+	|SCANF '(' STRING ')' {
+		auto ast=new AST::FuncCall();
+		ast->expType=funcCall;
+		ast->funcName=new string("scanf");
+		ast->realArgList=nullptr;
+		ast->IO=$3;
+		$$=ast;
+	}
+	|SCANF '(' STRING ',' FuncRParams ')'{
+		auto ast=new AST::FuncCall();
+		ast->expType=funcCall;
+		ast->funcName=new string("scanf");
+		ast->realArgList=$5;
+		ast->IO=$3;
+		$$=ast;
+		
+	}
+	|UnaryOp UnaryExp {}
 	;
 
 UnaryOp

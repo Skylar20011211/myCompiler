@@ -9,7 +9,7 @@ const char* typeNames[]{
 
 const char* stmtTypeNames[]{
 	 "assignStmt",
-	 "expStmt","blockStmt","ifStmt","whileStmt","breakStmt","breakStmt","continueStmt","returnStmt"
+	 "expStmt","blockStmt","ifStmt","whileStmt","breakStmt","continueStmt","returnStmt"
 };
 
 const char* expTypeNames[]{
@@ -26,7 +26,7 @@ std::string space3(12, ' ');
 void AST::CompUnit::Dump()const {
 	for (const auto& Unit :units) {
 		if (Unit->unitType == VarDeclare) {
-			VarDecl* ptr = static_cast<VarDecl*>(Unit);
+			Variable* ptr = static_cast<Variable*>(Unit);
 			ptr->Dump();
 		}
 	    else {
@@ -36,21 +36,10 @@ void AST::CompUnit::Dump()const {
 	}
 }
 
-void AST::VarDecl::Dump()const {
-	cout << "VarDecl:{" << endl;
-	cout <<space1<< "BType:" << typeNames[built_in_type] << endl;
-	cout << space1 << "VarDefList:" << endl;
-	for (const auto& var : varDefList->varList) {
-		cout << space2 << "Variable:";
-		var->Dump();
-		cout << endl;
-	}
-	cout << "}"<<endl;
-}
-
 void AST::Variable::Dump()const {
+	cout << "Variable: "<<typeNames[bType];
 	if (!is_array) {
-		cout << "Ident:" << *varName;
+		cout << " Ident:" << *varName;
 		if (initValList) {
 			cout << "= InitVal:";
 			std::vector<AST::Exp*>::iterator it = initValList->valList.begin();
@@ -58,9 +47,11 @@ void AST::Variable::Dump()const {
 		}
 	}
 	else {
-		cout << "Ident:" << *varName;
+		cout << " Ident:" << *varName;
 		for (std::size_t i = 0; i < arr->len.size(); ++i) {
-			cout << '[' << arr->len[i]->val << ']';
+			cout << '[';
+				arr->len[i]->Dump();
+				cout << ']';
 		}
 		if (initValList) {
 			cout << "= InitVal:{";
@@ -102,7 +93,7 @@ void AST::Arg::Dump()const {
 
 void AST::BlockItem::Dump()const {
 	if (itemType == Decl) {
-		VarDecl* ptr = static_cast<AST::VarDecl*>(const_cast<AST::BlockItem*>(this));
+		Variable* ptr = static_cast<AST::Variable*>(const_cast<AST::BlockItem*>(this));
 		ptr->Dump();
 	}
 	else {
@@ -118,6 +109,12 @@ void AST::Stmt::Dump()const {
 	case ifStmt:  static_cast<IfStmt*>(const_cast<Stmt*>(this))->Dump(); break;
 	case whileStmt:   static_cast<WhileStmt*>(const_cast<Stmt*>(this))->Dump(); break;
 	case returnStmt:  static_cast<ReturnStmt*>(const_cast<Stmt*>(this)) ->Dump(); break;
+	case blockStmt:
+		for (const auto& item : static_cast<Block*>(const_cast<Stmt*>(this))->itemList) {
+			cout << space2;
+			item->Dump();
+			cout << endl;
+		}
 	}
 }
 
@@ -157,8 +154,8 @@ void AST::WhileStmt::Dump()const {
 }
 
 void AST::ReturnStmt::Dump()const {
-	cout << "RetVal:" << endl;
-	cout << space1;
+	cout << "StmtType:" << stmtTypeNames[stmtType] << endl;
+	cout << space2<<"RetVal:" << endl;
 	retVal->Dump();
 	cout << endl;
 }

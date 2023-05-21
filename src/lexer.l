@@ -20,14 +20,15 @@ LineComment   "//".*
 MultiLineComment    "/*"([^\*]|(\*)*[^\*/])*(\*)*"*/" 
 
 /* 标识符 */
-Identifier    [a-zA-Z_][a-zA-Z0-9_]*
-String        \"(\\.|[^"\\])*\"
 
 /* 整数字面量 */
 Decimal       [1-9][0-9]*
 Octal         0[0-7]*
 Hexadecimal   0[xX][0-9a-fA-F]+
 Float         [0-9]+\.[0-9]*
+
+Identifier    [a-zA-Z_][a-zA-Z0-9_]*
+String        \"(\\.|[^"\\])*\"
 
 %%
 
@@ -45,8 +46,8 @@ Float         [0-9]+\.[0-9]*
 "while"         { return WHILE; }
 "break"         { return BREAK; }
 "continue"      { return CONTINUE; }
-"printf"        { yylval.str_val = new string(yytext); return PRINTF; }
-"scanf"         { yylval.str_val = new string(yytext); return SCANF; }
+"printf"        { return PRINTF; }
+"scanf"         { return SCANF; }
 "!="            { return NE; }
 "=="            { return EQ; }
 "<="            { return LE; }
@@ -54,9 +55,9 @@ Float         [0-9]+\.[0-9]*
 "&&"			{return AND;}
 "||"			{return OR;}
 
-
 {Identifier}    { yylval.str_val = new string(yytext); return IDENT; }
 {String}        { char* tmp = new char[yyleng - 1]; strcpy(tmp, yytext + 1); tmp[yyleng-2] = '\0'; yylval.str_val = new string(tmp); return STRING; }
+
 
 {Decimal}       { yylval.int_val = strtol(yytext, nullptr, 0); return INT_CONST; }
 {Octal}         { yylval.int_val = strtol(yytext, nullptr, 0); return INT_CONST; }

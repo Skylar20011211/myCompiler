@@ -606,7 +606,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 32 "src/lexer.l"
+#line 33 "src/lexer.l"
 
 
 #line 613 "C:/course/Compiler/myCompiler/src/lexer.cpp"
@@ -694,107 +694,107 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 34 "src/lexer.l"
+#line 35 "src/lexer.l"
 {  }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 35 "src/lexer.l"
+#line 36 "src/lexer.l"
 {  }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 36 "src/lexer.l"
+#line 37 "src/lexer.l"
 { }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 38 "src/lexer.l"
+#line 39 "src/lexer.l"
 { return INT; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 39 "src/lexer.l"
+#line 40 "src/lexer.l"
 { return RETURN; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 40 "src/lexer.l"
+#line 41 "src/lexer.l"
 { return FLOAT; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 41 "src/lexer.l"
+#line 42 "src/lexer.l"
 { return CONST; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 42 "src/lexer.l"
+#line 43 "src/lexer.l"
 { return VOID; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 43 "src/lexer.l"
+#line 44 "src/lexer.l"
 { return IF; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 44 "src/lexer.l"
+#line 45 "src/lexer.l"
 { return ELSE; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 45 "src/lexer.l"
+#line 46 "src/lexer.l"
 { return WHILE; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 46 "src/lexer.l"
+#line 47 "src/lexer.l"
 { return BREAK; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 47 "src/lexer.l"
+#line 48 "src/lexer.l"
 { return CONTINUE; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 48 "src/lexer.l"
-{ yylval.str_val = new string(yytext); return PRINTF; }
+#line 49 "src/lexer.l"
+{ return PRINTF; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 49 "src/lexer.l"
-{ yylval.str_val = new string(yytext); return SCANF; }
+#line 50 "src/lexer.l"
+{ return SCANF; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 50 "src/lexer.l"
+#line 51 "src/lexer.l"
 { return NE; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 51 "src/lexer.l"
+#line 52 "src/lexer.l"
 { return EQ; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 52 "src/lexer.l"
+#line 53 "src/lexer.l"
 { return LE; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 53 "src/lexer.l"
+#line 54 "src/lexer.l"
 { return GE; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 54 "src/lexer.l"
+#line 55 "src/lexer.l"
 {return AND;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 55 "src/lexer.l"
+#line 56 "src/lexer.l"
 {return OR;}
 	YY_BREAK
 case 22:
@@ -809,32 +809,32 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 61 "src/lexer.l"
+#line 62 "src/lexer.l"
 { yylval.int_val = strtol(yytext, nullptr, 0); return INT_CONST; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 62 "src/lexer.l"
+#line 63 "src/lexer.l"
 { yylval.int_val = strtol(yytext, nullptr, 0); return INT_CONST; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 63 "src/lexer.l"
+#line 64 "src/lexer.l"
 { yylval.int_val = strtol(yytext, nullptr, 0); return INT_CONST; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 64 "src/lexer.l"
+#line 65 "src/lexer.l"
 { yylval.float_val = strtod(yytext, nullptr); return FLOAT_CONST; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 66 "src/lexer.l"
+#line 67 "src/lexer.l"
 { return yytext[0]; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 68 "src/lexer.l"
+#line 69 "src/lexer.l"
 ECHO;
 	YY_BREAK
 #line 841 "C:/course/Compiler/myCompiler/src/lexer.cpp"
@@ -1723,5 +1723,5 @@ int main()
 	return 0;
 	}
 #endif
-#line 68 "src/lexer.l"
+#line 69 "src/lexer.l"
 
