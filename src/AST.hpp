@@ -1,4 +1,7 @@
-#pragma once
+#ifndef AST_HPP
+#define AST_HPP
+
+
 #include <iostream>
 #include <vector>
 #include <map>
@@ -6,11 +9,12 @@
 #include <string>
 #include <exception>
 
-enum Type { Int, Float, Void};
-enum BlockItemType {Decl,Stmt};
+
+enum basType { Int, Float, Void};
+enum BlockItemType {DECL,STMT};
 enum ExpType {finalExp,lValExp,constNumExp, funcCall, mulExp, divExp,modExp,addExp,subExp,LTexp,GTexp,LEexp,GEexp,EQexp,NEexp,lAndExp,lOrExp};
 enum StmtType{ assignStmt, expStmt,blockStmt,ifStmt,whileStmt,breakStmt,continueStmt,returnStmt};
-enum UnitType{VarDeclare,Func};
+enum UnitType{VarDeclare,Fun};
 
 namespace AST {
 
@@ -63,12 +67,14 @@ namespace AST {
 	public:
 		virtual ~BaseAST() = default;
 		virtual void Dump() const = 0;
+		
 	};
 
 	class CompUnit : public BaseAST {
 	public:
 		std::vector<Unit*> units;
 		void Dump() const override;
+		
 	};
 
 	class Unit :public BaseAST {
@@ -92,6 +98,7 @@ namespace AST {
 	public:
 		ExpType expType;
 		void Dump() const override;
+		
 	};
 
 	class Block :public Stmt {
@@ -104,17 +111,19 @@ namespace AST {
 	public:
 		std::string* varName;
 		bool is_array;
-		Type bType;
+		basType bType;
 		ArrayType* arr;
 		InitValList* initValList;
 		void Dump() const override;
+		
 	};
 
 	class ConstNumber :public Exp {
 	public:
-		Type constType;
+		basType constType;
 		float val;
 		void Dump() const override;
+		
 	};
 
 	class ArrayType : public ConstNumber {
@@ -129,17 +138,18 @@ namespace AST {
 
 	class Func : public Unit{
 	public:
-		Type funcType;
+		basType funcType;
 		std::string* funcName;
 		ArgList* argList;
 		Block* funcBody;
 		void Dump() const override;
+
 	};
 
 	class Arg :public BaseAST {
 	public:
 		std::string* argName;
-		Type bType;
+		basType bType;
 		bool is_pointer;
 		void Dump() const override;
 	};
@@ -190,13 +200,14 @@ namespace AST {
 		Exp* lExp;
 		Exp* rExp;
 		void Dump() const override;
+		
 	};
 	
 	class FuncCall :public Exp {
 	public:
 		std::string* funcName;
 		RealArgList* realArgList;
-		std::string*IO;
+		std::string* IO;
 		void Dump() const override;
 	};
 
@@ -208,3 +219,5 @@ namespace AST {
 
 }
 // ...
+
+#endif

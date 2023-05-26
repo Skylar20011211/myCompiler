@@ -92,7 +92,7 @@ void AST::Arg::Dump()const {
 }
 
 void AST::BlockItem::Dump()const {
-	if (itemType == Decl) {
+	if (itemType == DECL) {
 		Variable* ptr = static_cast<AST::Variable*>(const_cast<AST::BlockItem*>(this));
 		ptr->Dump();
 	}
@@ -206,7 +206,6 @@ void AST::FuncCall::Dump()const {
 	}
 	cout << endl;
 }
-
 
 
 

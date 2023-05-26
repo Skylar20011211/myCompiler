@@ -171,7 +171,7 @@ typedef union YYSTYPE
   AST::Stmt* stmt_val;
   AST::RealArgList* real_arg_list_val;
   AST::Exp* exp_val;
-  Type type_val;
+  basType type_val;
 
 
 
@@ -507,15 +507,15 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    61,    61,    68,    75,    81,    90,    94,    98,   105,
-     111,   120,   129,   138,   150,   155,   162,   167,   172,   177,
-     184,   192,   203,   208,   215,   222,   229,   233,   239,   244,
-     251,   252,   256,   263,   264,   265,   273,   281,   288,   293,
-     298,   304,   312,   314,   317,   325,   336,   337,   338,   342,
-     350,   356,   365,   367,   376,   384,   393,   401,   409,   418,
-     422,   423,   424,   428,   433,   440,   441,   448,   455,   465,
-     466,   473,   483,   484,   491,   498,   505,   515,   516,   523,
-     533,   534,   544,   545
+       0,    61,    61,    69,    76,    82,    91,    95,    99,   106,
+     112,   121,   130,   139,   151,   156,   163,   168,   173,   178,
+     185,   193,   204,   209,   216,   223,   230,   234,   240,   245,
+     252,   253,   257,   264,   265,   266,   274,   282,   289,   294,
+     299,   305,   313,   315,   318,   326,   337,   338,   339,   343,
+     351,   357,   366,   368,   377,   385,   394,   402,   410,   419,
+     423,   424,   425,   429,   434,   441,   442,   449,   456,   466,
+     467,   474,   484,   485,   492,   499,   506,   516,   517,   524,
+     534,   535,   545,   546
 };
 #endif
 
@@ -1543,7 +1543,8 @@ yyreduce:
 #line 61 "src/parser.y"
     {
     auto comp_unit = new AST::CompUnit();
-	(yyvsp[(1) - (1)].func_val)->unitType=Func;
+	(yyvsp[(1) - (1)].func_val)->unitType=Fun
+	;
     comp_unit->units.push_back((yyvsp[(1) - (1)].func_val));
     Ast =comp_unit;
 	(yyval.comp_unit_val)=comp_unit;
@@ -1553,7 +1554,7 @@ yyreduce:
   case 3:
 
 /* Line 1455 of yacc.c  */
-#line 68 "src/parser.y"
+#line 69 "src/parser.y"
     {
 	auto comp_unit=new AST::CompUnit();
 	(yyvsp[(1) - (1)].var_val)->unitType=VarDeclare;
@@ -1566,9 +1567,9 @@ yyreduce:
   case 4:
 
 /* Line 1455 of yacc.c  */
-#line 75 "src/parser.y"
+#line 76 "src/parser.y"
     {
-	(yyvsp[(2) - (2)].func_val)->unitType=Func;
+	(yyvsp[(2) - (2)].func_val)->unitType=Fun;
 	(yyvsp[(1) - (2)].comp_unit_val)->units.push_back((yyvsp[(2) - (2)].func_val));
 	Ast =(yyvsp[(1) - (2)].comp_unit_val);
 	(yyval.comp_unit_val)=(yyvsp[(1) - (2)].comp_unit_val);
@@ -1578,7 +1579,7 @@ yyreduce:
   case 5:
 
 /* Line 1455 of yacc.c  */
-#line 81 "src/parser.y"
+#line 82 "src/parser.y"
     {
 	(yyvsp[(2) - (2)].var_val)->unitType=VarDeclare;
 	(yyvsp[(1) - (2)].comp_unit_val)->units.push_back((yyvsp[(2) - (2)].var_val));
@@ -1590,9 +1591,9 @@ yyreduce:
   case 6:
 
 /* Line 1455 of yacc.c  */
-#line 90 "src/parser.y"
+#line 91 "src/parser.y"
     {
-	    Type var_type=Int;
+	    basType var_type=Int;
 		(yyval.type_val)=var_type;
 	;}
     break;
@@ -1600,9 +1601,9 @@ yyreduce:
   case 7:
 
 /* Line 1455 of yacc.c  */
-#line 94 "src/parser.y"
+#line 95 "src/parser.y"
     {
-		Type var_type=Float;
+		basType var_type=Float;
 		(yyval.type_val)=var_type;
 	;}
     break;
@@ -1610,9 +1611,9 @@ yyreduce:
   case 8:
 
 /* Line 1455 of yacc.c  */
-#line 98 "src/parser.y"
+#line 99 "src/parser.y"
     {
-		Type var_type=Void;
+		basType var_type=Void;
 		(yyval.type_val)=var_type;  
 	;}
     break;
@@ -1620,7 +1621,7 @@ yyreduce:
   case 9:
 
 /* Line 1455 of yacc.c  */
-#line 105 "src/parser.y"
+#line 106 "src/parser.y"
     {
 		(yyval.var_val)=(yyvsp[(1) - (2)].var_val);
 	;}
@@ -1629,7 +1630,7 @@ yyreduce:
   case 10:
 
 /* Line 1455 of yacc.c  */
-#line 111 "src/parser.y"
+#line 112 "src/parser.y"
     {
 		auto ast=new AST::Variable();
 		ast->bType=(yyvsp[(1) - (2)].type_val);
@@ -1644,7 +1645,7 @@ yyreduce:
   case 11:
 
 /* Line 1455 of yacc.c  */
-#line 120 "src/parser.y"
+#line 121 "src/parser.y"
     {
 		auto ast=new AST::Variable();
 		ast->bType=(yyvsp[(1) - (3)].type_val);
@@ -1659,7 +1660,7 @@ yyreduce:
   case 12:
 
 /* Line 1455 of yacc.c  */
-#line 129 "src/parser.y"
+#line 130 "src/parser.y"
     {
 		auto ast=new AST::Variable();
 		ast->bType=(yyvsp[(1) - (4)].type_val);
@@ -1674,7 +1675,7 @@ yyreduce:
   case 13:
 
 /* Line 1455 of yacc.c  */
-#line 138 "src/parser.y"
+#line 139 "src/parser.y"
     {
 		auto ast=new AST::Variable();
 		ast->bType=(yyvsp[(1) - (5)].type_val);
@@ -1689,7 +1690,7 @@ yyreduce:
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 150 "src/parser.y"
+#line 151 "src/parser.y"
     {
 		auto ast=new AST::ArrayType();
 		ast->len.push_back((yyvsp[(2) - (3)].exp_val));
@@ -1700,7 +1701,7 @@ yyreduce:
   case 15:
 
 /* Line 1455 of yacc.c  */
-#line 155 "src/parser.y"
+#line 156 "src/parser.y"
     {
 		(yyvsp[(4) - (4)].arr_val)->len.insert((yyvsp[(4) - (4)].arr_val)->len.begin(),(yyvsp[(2) - (4)].exp_val));
 		(yyval.arr_val)=(yyvsp[(4) - (4)].arr_val);
@@ -1710,7 +1711,7 @@ yyreduce:
   case 16:
 
 /* Line 1455 of yacc.c  */
-#line 162 "src/parser.y"
+#line 163 "src/parser.y"
     {
 		auto ast=new AST::InitValList();
 		ast->valList.push_back((yyvsp[(1) - (1)].exp_val));
@@ -1721,14 +1722,14 @@ yyreduce:
   case 17:
 
 /* Line 1455 of yacc.c  */
-#line 167 "src/parser.y"
+#line 168 "src/parser.y"
     {(yyval.init_val_list_val)=(yyvsp[(2) - (3)].init_val_list_val);;}
     break;
 
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 172 "src/parser.y"
+#line 173 "src/parser.y"
     {
 		auto ast=new AST::InitValList();
 		ast->valList.push_back((yyvsp[(1) - (1)].exp_val));
@@ -1739,7 +1740,7 @@ yyreduce:
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 177 "src/parser.y"
+#line 178 "src/parser.y"
     {
 		(yyvsp[(1) - (3)].init_val_list_val)->valList.push_back((yyvsp[(3) - (3)].exp_val));
 		(yyval.init_val_list_val)=(yyvsp[(1) - (3)].init_val_list_val);
@@ -1749,7 +1750,7 @@ yyreduce:
   case 20:
 
 /* Line 1455 of yacc.c  */
-#line 184 "src/parser.y"
+#line 185 "src/parser.y"
     {
     auto func = new AST::Func();
     func->funcType = (yyvsp[(1) - (5)].type_val);
@@ -1763,7 +1764,7 @@ yyreduce:
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 192 "src/parser.y"
+#line 193 "src/parser.y"
     {
 	auto func = new AST::Func();
     func->funcType = (yyvsp[(1) - (6)].type_val);
@@ -1777,7 +1778,7 @@ yyreduce:
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 203 "src/parser.y"
+#line 204 "src/parser.y"
     {
 		auto ast= new AST::ArgList();
 	    ast->args.push_back((yyvsp[(1) - (1)].arg_val));
@@ -1788,7 +1789,7 @@ yyreduce:
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 208 "src/parser.y"
+#line 209 "src/parser.y"
     {
 		(yyvsp[(1) - (3)].arg_list_val)->args.push_back((yyvsp[(3) - (3)].arg_val));
 		(yyval.arg_list_val)=(yyvsp[(1) - (3)].arg_list_val);
@@ -1798,7 +1799,7 @@ yyreduce:
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 215 "src/parser.y"
+#line 216 "src/parser.y"
     {
 		auto ast=new AST::Arg();
 		ast->argName=(yyvsp[(2) - (2)].str_val);
@@ -1811,7 +1812,7 @@ yyreduce:
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 222 "src/parser.y"
+#line 223 "src/parser.y"
     {
 		auto ast=new AST::Arg();
 		ast->argName=(yyvsp[(2) - (4)].str_val);
@@ -1824,14 +1825,14 @@ yyreduce:
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 229 "src/parser.y"
+#line 230 "src/parser.y"
     {;}
     break;
 
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 233 "src/parser.y"
+#line 234 "src/parser.y"
     {
     (yyval.block_val)=(yyvsp[(2) - (3)].block_val);
   ;}
@@ -1840,7 +1841,7 @@ yyreduce:
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 239 "src/parser.y"
+#line 240 "src/parser.y"
     {
 		auto ast=new AST::Block();
 		ast->itemList.push_back((yyvsp[(1) - (1)].block_item_val));
@@ -1851,7 +1852,7 @@ yyreduce:
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 244 "src/parser.y"
+#line 245 "src/parser.y"
     {
 		(yyvsp[(1) - (2)].block_val)->itemList.push_back((yyvsp[(2) - (2)].block_item_val));
 		(yyval.block_val)=(yyvsp[(1) - (2)].block_val);
@@ -1861,21 +1862,21 @@ yyreduce:
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 251 "src/parser.y"
-    {(yyvsp[(1) - (1)].var_val)->itemType=Decl;(yyval.block_item_val)=(yyvsp[(1) - (1)].var_val);;}
+#line 252 "src/parser.y"
+    {(yyvsp[(1) - (1)].var_val)->itemType=DECL;(yyval.block_item_val)=(yyvsp[(1) - (1)].var_val);;}
     break;
 
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 252 "src/parser.y"
-    {(yyvsp[(1) - (1)].stmt_val)->itemType=Stmt;(yyval.block_item_val)=(yyvsp[(1) - (1)].stmt_val);;}
+#line 253 "src/parser.y"
+    {(yyvsp[(1) - (1)].stmt_val)->itemType=STMT;(yyval.block_item_val)=(yyvsp[(1) - (1)].stmt_val);;}
     break;
 
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 256 "src/parser.y"
+#line 257 "src/parser.y"
     {
 		auto ast=new AST::AssignStmt();
 		ast->stmtType=assignStmt;
@@ -1888,21 +1889,21 @@ yyreduce:
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 263 "src/parser.y"
+#line 264 "src/parser.y"
     {(yyvsp[(1) - (2)].exp_val)->stmtType=expStmt;(yyval.stmt_val)=(yyvsp[(1) - (2)].exp_val);;}
     break;
 
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 264 "src/parser.y"
+#line 265 "src/parser.y"
     {(yyvsp[(1) - (1)].block_val)->stmtType=blockStmt;(yyval.stmt_val)=(yyvsp[(1) - (1)].block_val);;}
     break;
 
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 265 "src/parser.y"
+#line 266 "src/parser.y"
     {
 		auto ast=new AST::IfStmt();
 		ast->stmtType=ifStmt;
@@ -1916,7 +1917,7 @@ yyreduce:
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 273 "src/parser.y"
+#line 274 "src/parser.y"
     {
 		auto ast=new AST::IfStmt();
 		ast->stmtType=ifStmt;
@@ -1930,7 +1931,7 @@ yyreduce:
   case 37:
 
 /* Line 1455 of yacc.c  */
-#line 281 "src/parser.y"
+#line 282 "src/parser.y"
     {
 		auto ast=new AST::WhileStmt();
 		ast->stmtType=whileStmt;
@@ -1943,7 +1944,7 @@ yyreduce:
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 288 "src/parser.y"
+#line 289 "src/parser.y"
     {
 		auto ast=new AST::Stmt();
 		ast->stmtType=breakStmt;
@@ -1954,7 +1955,7 @@ yyreduce:
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 293 "src/parser.y"
+#line 294 "src/parser.y"
     {
 		auto ast=new AST::Stmt();
 		ast->stmtType=continueStmt;
@@ -1965,7 +1966,7 @@ yyreduce:
   case 40:
 
 /* Line 1455 of yacc.c  */
-#line 298 "src/parser.y"
+#line 299 "src/parser.y"
     {
 		auto ast=new AST::ReturnStmt();
 		ast->stmtType=returnStmt;
@@ -1977,7 +1978,7 @@ yyreduce:
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 304 "src/parser.y"
+#line 305 "src/parser.y"
     {
 		auto ast=new AST::ReturnStmt();
 		ast->stmtType=returnStmt;
@@ -1989,21 +1990,21 @@ yyreduce:
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 312 "src/parser.y"
+#line 313 "src/parser.y"
     {(yyval.exp_val)=(yyvsp[(1) - (1)].exp_val);;}
     break;
 
   case 43:
 
 /* Line 1455 of yacc.c  */
-#line 314 "src/parser.y"
+#line 315 "src/parser.y"
     {(yyval.exp_val)=(yyvsp[(1) - (1)].exp_val);;}
     break;
 
   case 44:
 
 /* Line 1455 of yacc.c  */
-#line 317 "src/parser.y"
+#line 318 "src/parser.y"
     {
 		auto ast=new AST::Variable();
 		ast->varName=(yyvsp[(1) - (1)].str_val);
@@ -2017,12 +2018,12 @@ yyreduce:
   case 45:
 
 /* Line 1455 of yacc.c  */
-#line 325 "src/parser.y"
+#line 326 "src/parser.y"
     {
 		auto ast=new AST::Variable();
 		ast->varName=(yyvsp[(1) - (2)].str_val);
 		ast->is_array=true;
-		ast->arr=(yyvsp[(2) - (2)].arr_val);
+		ast->arr=(yyvsp[(2) - (2)].arr_val);//这里记录的是索引位置不是数组size
 		ast->initValList=nullptr;
 		(yyval.var_val)=ast;
 	;}
@@ -2031,28 +2032,28 @@ yyreduce:
   case 46:
 
 /* Line 1455 of yacc.c  */
-#line 336 "src/parser.y"
+#line 337 "src/parser.y"
     {(yyvsp[(1) - (1)].exp_val)->expType=finalExp;(yyval.exp_val)=(yyvsp[(1) - (1)].exp_val);;}
     break;
 
   case 47:
 
 /* Line 1455 of yacc.c  */
-#line 337 "src/parser.y"
+#line 338 "src/parser.y"
     {(yyvsp[(1) - (1)].var_val)->expType=lValExp;(yyval.exp_val)=(yyvsp[(1) - (1)].var_val);;}
     break;
 
   case 48:
 
 /* Line 1455 of yacc.c  */
-#line 338 "src/parser.y"
+#line 339 "src/parser.y"
     {(yyvsp[(1) - (1)].exp_val)->expType=constNumExp;(yyval.exp_val)=(yyvsp[(1) - (1)].exp_val);;}
     break;
 
   case 49:
 
 /* Line 1455 of yacc.c  */
-#line 342 "src/parser.y"
+#line 343 "src/parser.y"
     {
 		auto ast=new AST::FinalExp();
 		ast->iExp=(yyvsp[(2) - (3)].exp_val);
@@ -2063,7 +2064,7 @@ yyreduce:
   case 50:
 
 /* Line 1455 of yacc.c  */
-#line 350 "src/parser.y"
+#line 351 "src/parser.y"
     {
 	  auto ast=new AST::ConstNumber();
 	  ast->constType=Int;
@@ -2075,7 +2076,7 @@ yyreduce:
   case 51:
 
 /* Line 1455 of yacc.c  */
-#line 356 "src/parser.y"
+#line 357 "src/parser.y"
     {
 	  auto ast=new AST::ConstNumber();
 	  ast->constType=Float;
@@ -2087,14 +2088,14 @@ yyreduce:
   case 52:
 
 /* Line 1455 of yacc.c  */
-#line 365 "src/parser.y"
+#line 366 "src/parser.y"
     {(yyval.exp_val)=(yyvsp[(1) - (1)].exp_val);;}
     break;
 
   case 53:
 
 /* Line 1455 of yacc.c  */
-#line 367 "src/parser.y"
+#line 368 "src/parser.y"
     {
 		auto ast=new AST::FuncCall();
 		ast->expType=funcCall;
@@ -2109,7 +2110,7 @@ yyreduce:
   case 54:
 
 /* Line 1455 of yacc.c  */
-#line 376 "src/parser.y"
+#line 377 "src/parser.y"
     {
 		auto ast=new AST::FuncCall();
 		ast->expType=funcCall;
@@ -2123,7 +2124,7 @@ yyreduce:
   case 55:
 
 /* Line 1455 of yacc.c  */
-#line 384 "src/parser.y"
+#line 385 "src/parser.y"
     {
 		auto ast=new AST::FuncCall();
 		ast->expType=funcCall;
@@ -2138,7 +2139,7 @@ yyreduce:
   case 56:
 
 /* Line 1455 of yacc.c  */
-#line 393 "src/parser.y"
+#line 394 "src/parser.y"
     {
 		auto ast=new AST::FuncCall();
 		ast->expType=funcCall;
@@ -2152,7 +2153,7 @@ yyreduce:
   case 57:
 
 /* Line 1455 of yacc.c  */
-#line 401 "src/parser.y"
+#line 402 "src/parser.y"
     {
 		auto ast=new AST::FuncCall();
 		ast->expType=funcCall;
@@ -2166,7 +2167,7 @@ yyreduce:
   case 58:
 
 /* Line 1455 of yacc.c  */
-#line 409 "src/parser.y"
+#line 410 "src/parser.y"
     {
 		auto ast=new AST::FuncCall();
 		ast->expType=funcCall;
@@ -2181,35 +2182,35 @@ yyreduce:
   case 59:
 
 /* Line 1455 of yacc.c  */
-#line 418 "src/parser.y"
+#line 419 "src/parser.y"
     {;}
     break;
 
   case 60:
 
 /* Line 1455 of yacc.c  */
-#line 422 "src/parser.y"
+#line 423 "src/parser.y"
     {;}
     break;
 
   case 61:
 
 /* Line 1455 of yacc.c  */
-#line 423 "src/parser.y"
+#line 424 "src/parser.y"
     {;}
     break;
 
   case 62:
 
 /* Line 1455 of yacc.c  */
-#line 424 "src/parser.y"
+#line 425 "src/parser.y"
     {;}
     break;
 
   case 63:
 
 /* Line 1455 of yacc.c  */
-#line 428 "src/parser.y"
+#line 429 "src/parser.y"
     {
 		auto ast=new AST::RealArgList();
 		ast->realArgs.push_back((yyvsp[(1) - (1)].exp_val));
@@ -2220,7 +2221,7 @@ yyreduce:
   case 64:
 
 /* Line 1455 of yacc.c  */
-#line 433 "src/parser.y"
+#line 434 "src/parser.y"
     {
 		(yyvsp[(1) - (3)].real_arg_list_val)->realArgs.push_back((yyvsp[(3) - (3)].exp_val));
 		(yyval.real_arg_list_val)=(yyvsp[(1) - (3)].real_arg_list_val);
@@ -2230,14 +2231,14 @@ yyreduce:
   case 65:
 
 /* Line 1455 of yacc.c  */
-#line 440 "src/parser.y"
+#line 441 "src/parser.y"
     {(yyval.exp_val)=(yyvsp[(1) - (1)].exp_val);;}
     break;
 
   case 66:
 
 /* Line 1455 of yacc.c  */
-#line 441 "src/parser.y"
+#line 442 "src/parser.y"
     {
 		auto ast=new AST::BinaryExp();
 		ast->expType=mulExp;
@@ -2250,7 +2251,7 @@ yyreduce:
   case 67:
 
 /* Line 1455 of yacc.c  */
-#line 448 "src/parser.y"
+#line 449 "src/parser.y"
     {
 		auto ast=new AST::BinaryExp();
 		ast->expType=divExp;
@@ -2263,7 +2264,7 @@ yyreduce:
   case 68:
 
 /* Line 1455 of yacc.c  */
-#line 455 "src/parser.y"
+#line 456 "src/parser.y"
     {
 		auto ast=new AST::BinaryExp();
 		ast->expType=modExp;
@@ -2276,14 +2277,14 @@ yyreduce:
   case 69:
 
 /* Line 1455 of yacc.c  */
-#line 465 "src/parser.y"
+#line 466 "src/parser.y"
     {(yyval.exp_val)=(yyvsp[(1) - (1)].exp_val);;}
     break;
 
   case 70:
 
 /* Line 1455 of yacc.c  */
-#line 466 "src/parser.y"
+#line 467 "src/parser.y"
     {
 		auto ast=new AST::BinaryExp();
 		ast->expType=addExp;
@@ -2296,7 +2297,7 @@ yyreduce:
   case 71:
 
 /* Line 1455 of yacc.c  */
-#line 473 "src/parser.y"
+#line 474 "src/parser.y"
     {
 		auto ast=new AST::BinaryExp();
 		ast->expType=subExp;
@@ -2309,14 +2310,14 @@ yyreduce:
   case 72:
 
 /* Line 1455 of yacc.c  */
-#line 483 "src/parser.y"
+#line 484 "src/parser.y"
     {(yyval.exp_val)=(yyvsp[(1) - (1)].exp_val);;}
     break;
 
   case 73:
 
 /* Line 1455 of yacc.c  */
-#line 484 "src/parser.y"
+#line 485 "src/parser.y"
     {
 		auto ast=new AST::BinaryExp();
 		ast->expType=LTexp;
@@ -2329,7 +2330,7 @@ yyreduce:
   case 74:
 
 /* Line 1455 of yacc.c  */
-#line 491 "src/parser.y"
+#line 492 "src/parser.y"
     {
 		auto ast=new AST::BinaryExp();
 		ast->expType=GTexp;
@@ -2342,7 +2343,7 @@ yyreduce:
   case 75:
 
 /* Line 1455 of yacc.c  */
-#line 498 "src/parser.y"
+#line 499 "src/parser.y"
     {
 		auto ast=new AST::BinaryExp();
 		ast->expType=LEexp;
@@ -2355,7 +2356,7 @@ yyreduce:
   case 76:
 
 /* Line 1455 of yacc.c  */
-#line 505 "src/parser.y"
+#line 506 "src/parser.y"
     {
 		auto ast=new AST::BinaryExp();
 		ast->expType=GEexp;
@@ -2368,14 +2369,14 @@ yyreduce:
   case 77:
 
 /* Line 1455 of yacc.c  */
-#line 515 "src/parser.y"
+#line 516 "src/parser.y"
     {(yyval.exp_val)=(yyvsp[(1) - (1)].exp_val);;}
     break;
 
   case 78:
 
 /* Line 1455 of yacc.c  */
-#line 516 "src/parser.y"
+#line 517 "src/parser.y"
     {
 		auto ast=new AST::BinaryExp();
 		ast->expType=EQexp;
@@ -2388,7 +2389,7 @@ yyreduce:
   case 79:
 
 /* Line 1455 of yacc.c  */
-#line 523 "src/parser.y"
+#line 524 "src/parser.y"
     {
 		auto ast=new AST::BinaryExp();
 		ast->expType=NEexp;
@@ -2401,14 +2402,14 @@ yyreduce:
   case 80:
 
 /* Line 1455 of yacc.c  */
-#line 533 "src/parser.y"
+#line 534 "src/parser.y"
     {(yyval.exp_val)=(yyvsp[(1) - (1)].exp_val);;}
     break;
 
   case 81:
 
 /* Line 1455 of yacc.c  */
-#line 534 "src/parser.y"
+#line 535 "src/parser.y"
     {
 		auto ast=new AST::BinaryExp();
 		ast->expType=lAndExp;
@@ -2421,14 +2422,14 @@ yyreduce:
   case 82:
 
 /* Line 1455 of yacc.c  */
-#line 544 "src/parser.y"
+#line 545 "src/parser.y"
     {(yyval.exp_val)=(yyvsp[(1) - (1)].exp_val);;}
     break;
 
   case 83:
 
 /* Line 1455 of yacc.c  */
-#line 545 "src/parser.y"
+#line 546 "src/parser.y"
     {
 		auto ast=new AST::BinaryExp();
 		ast->expType=lOrExp;
@@ -2441,7 +2442,7 @@ yyreduce:
 
 
 /* Line 1455 of yacc.c  */
-#line 2445 "C:/course/Compiler/myCompiler/src/parser.tab.cpp"
+#line 2446 "C:/course/Compiler/myCompiler/src/parser.tab.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2653,7 +2654,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 553 "src/parser.y"
+#line 554 "src/parser.y"
 
 
 void yyerror(AST::CompUnit* &Ast , const char *s) {

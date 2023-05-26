@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include"AST.hpp"
+#include"CodeGen.hpp"
 
 using namespace std;
 
@@ -43,5 +44,7 @@ int main(int argc, const char* argv[]) {
 	// 输出解析得到的 AST, 其实就是个字符串
 	Ast->Dump();
 
+	Gen program_gen;
+	program_gen.CompUnitGen(Ast);
 }
 

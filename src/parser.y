@@ -34,7 +34,7 @@ using namespace std;
   AST::Stmt* stmt_val;
   AST::RealArgList* real_arg_list_val;
   AST::Exp* exp_val;
-  Type type_val;
+  basType type_val;
 }
 
 %token INT FLOAT VOID RETURN CONST IF ELSE WHILE BREAK CONTINUE NE EQ LE GE AND OR PRINTF SCANF
@@ -60,7 +60,8 @@ using namespace std;
 CompUnit
 	: FuncDef {
     auto comp_unit = new AST::CompUnit();
-	$1->unitType=Func;
+	$1->unitType=Fun
+	;
     comp_unit->units.push_back($1);
     Ast =comp_unit;
 	$$=comp_unit;
@@ -73,7 +74,7 @@ CompUnit
 	$$=comp_unit;
 	}
 	|CompUnit FuncDef{
-	$2->unitType=Func;
+	$2->unitType=Fun;
 	$1->units.push_back($2);
 	Ast =$1;
 	$$=$1;
@@ -88,15 +89,15 @@ CompUnit
 
 BType
 	:INT{
-	    Type var_type=Int;
+	    basType var_type=Int;
 		$$=var_type;
 	}
 	|FLOAT{
-		Type var_type=Float;
+		basType var_type=Float;
 		$$=var_type;
 	}
 	|VOID{
-		Type var_type=Void;
+		basType var_type=Void;
 		$$=var_type;  
 	}
 	;
@@ -248,8 +249,8 @@ BlockItemList
 	;
 	
 BlockItem
-	:VarDecl{$1->itemType=Decl;$$=$1;}
-	|Stmt{$1->itemType=Stmt;$$=$1;}
+	:VarDecl{$1->itemType=DECL;$$=$1;}
+	|Stmt{$1->itemType=STMT;$$=$1;}
 	;
 	
 Stmt
@@ -326,7 +327,7 @@ LVal
 		auto ast=new AST::Variable();
 		ast->varName=$1;
 		ast->is_array=true;
-		ast->arr=$2;
+		ast->arr=$2;//这里记录的是索引位置不是数组size
 		ast->initValList=nullptr;
 		$$=ast;
 	}

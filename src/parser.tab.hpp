@@ -102,7 +102,7 @@ typedef union YYSTYPE
   AST::Stmt* stmt_val;
   AST::RealArgList* real_arg_list_val;
   AST::Exp* exp_val;
-  Type type_val;
+  basType type_val;
 
 
 
