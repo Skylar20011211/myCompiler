@@ -199,11 +199,14 @@ void AST::BinaryExp::Dump()const {
 void AST::FuncCall::Dump()const {
 	cout << "Ident:";
 	cout << *funcName << endl;
-	cout << "FuncRParams:" << endl;
-	for (const auto& arg : realArgList->realArgs) {
-		cout << space1 << "FuncRParam:";
-		arg->Dump();
+	if (realArgList) {
+		for (const auto& arg : realArgList->realArgs) {
+			cout << "FuncRParams:" << endl;
+			cout << space1 << "FuncRParam:";
+			arg->Dump();
+		}
 	}
+	
 	cout << endl;
 }
 

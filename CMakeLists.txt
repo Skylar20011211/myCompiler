@@ -21,11 +21,15 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${LLVM_INCLUDE_DIRS})
 
+
 message("LLVM_INCLUDE_DIRS: ${LLVM_INCLUDE_DIRS}")
 
 separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
-
 add_definitions(${LLVM_DEFINITIONS_LIST})
+include_directories(${LLVM_INCLUDE_DIRS})
+
+add_definitions(-D_ITERATOR_DEBUG_LEVEL=0)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 # all of C/C++ source files
 file(GLOB_RECURSE CXX_SOURCES "src/*.cpp" "src/.*hpp")
@@ -34,7 +38,8 @@ set(SOURCES  ${CXX_SOURCES}
 
 # executable
 add_executable(compiler ${SOURCES})
-set_target_properties(compiler PROPERTIES C_STANDARD 11 CXX_STANDARD 17)
+target_compile_options(compiler PRIVATE "/MD")
 
 llvm_map_components_to_libnames(llvm_libs ${LLVM_TARGETS_TO_BUILD} support core irreader codegen mc mcparser option)
+target_compile_features(compiler PRIVATE cxx_std_17)
 target_link_libraries(compiler ${llvm_libs})

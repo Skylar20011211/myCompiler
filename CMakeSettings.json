@@ -2,7 +2,7 @@
   "configurations": [
     {
       "name": "x64-Release",
-      "generator": "Unix Makefiles",
+      "generator": "Visual Studio 16 2019 Win64",
       "configurationType": "MinSizeRel",
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
