@@ -6,42 +6,43 @@
 #include <fstream>
 #include"AST.hpp"
 #include"CodeGen.hpp"
+#include"myFlexer.hpp"
 
 using namespace std;
 
-// ÉùÃ÷ lexer µÄÊäÈë, ÒÔ¼° parser º¯Êý
-// ÎªÊ²Ã´²»ÒýÓÃ sysy.tab.hpp ÄØ? ÒòÎªÊ×ÏÈÀïÃæÃ»ÓÐ yyin µÄ¶¨Òå
-// Æä´Î, ÒòÎªÕâ¸öÎÄ¼þ²»ÊÇÎÒÃÇ×Ô¼ºÐ´µÄ, ¶øÊÇ±» Bison Éú³É³öÀ´µÄ
-// ÄãµÄ´úÂë±à¼­Æ÷/IDE ºÜ¿ÉÄÜÕÒ²»µ½Õâ¸öÎÄ¼þ, È»ºó»á¸øÄã±¨´í (ËäÈ»±àÒë²»»á³ö´í)
-// ¿´ÆðÀ´»áºÜ·³ÈË, ÓÚÊÇ¸É´à²ÉÓÃÕâÖÖ¿´ÆðÀ´ dirty µ«Êµ¼ÊºÜÓÐÐ§µÄÊÖ¶Î
+// ï¿½ï¿½ï¿½ï¿½ lexer ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½Ô¼ï¿½ parser ï¿½ï¿½ï¿½ï¿½
+// ÎªÊ²Ã´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ sysy.tab.hpp ï¿½ï¿½? ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ yyin ï¿½Ä¶ï¿½ï¿½ï¿½
+// ï¿½ï¿½ï¿½, ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼ï¿½Ð´ï¿½ï¿½, ï¿½ï¿½ï¿½Ç±ï¿½ Bison ï¿½ï¿½ï¿½É³ï¿½ï¿½ï¿½ï¿½ï¿½
+// ï¿½ï¿½Ä´ï¿½ï¿½ï¿½à¼­ï¿½ï¿½/IDE ï¿½Ü¿ï¿½ï¿½ï¿½ï¿½Ò²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½, È»ï¿½ï¿½ï¿½ï¿½ï¿½ã±¨ï¿½ï¿½ (ï¿½ï¿½È»ï¿½ï¿½ï¿½ë²»ï¿½ï¿½ï¿½ï¿½ï¿½)
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü·ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½Ç¸É´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¿ï¿½ï¿½ï¿½ï¿½ï¿½ dirty ï¿½ï¿½Êµï¿½Êºï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½Ö¶ï¿½
 
 extern FILE* yyin;
-extern int yyparse(AST::CompUnit* & Ast);
+extern int yyparse(AST::CompUnit* & Ast,  myFlexer&Flexer);
 
 
 int main(int argc, const char* argv[]) {
-	// ½âÎöÃüÁîÐÐ²ÎÊý. ²âÊÔ½Å±¾/ÆÀ²âÆ½Ì¨ÒªÇóÄãµÄ±àÒëÆ÷ÄÜ½ÓÊÕÈçÏÂ²ÎÊý:
-	// compiler Ä£Ê½ ÊäÈëÎÄ¼þ -o Êä³öÎÄ¼þ
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð²ï¿½ï¿½ï¿½. ï¿½ï¿½ï¿½Ô½Å±ï¿½/ï¿½ï¿½ï¿½ï¿½Æ½Ì¨Òªï¿½ï¿½ï¿½ï¿½Ä±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â²ï¿½ï¿½ï¿½:
+	// compiler Ä£Ê½ ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ -o ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½
 	int i;
 	for (i = 0; i < argc; i++) {
 		std::cout << "argv[" << i << "] = " << argv[i] << std::endl;
 	}
 
-	assert(argc == 5);
-	auto mode = argv[1];
-	auto input = argv[2];
-	auto output = argv[4];
+	assert(argc == 2);
+	auto input = argv[1];
+	
 
-  // ´ò¿ªÊäÈëÎÄ¼þ, ²¢ÇÒÖ¸¶¨ lexer ÔÚ½âÎöµÄÊ±ºò¶ÁÈ¡Õâ¸öÎÄ¼þ
-	yyin = fopen(input, "r");
-	assert(yyin);
+  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½, ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ lexer ï¿½Ú½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½
+	ifstream*file=new ifstream(input);
+	ifstream*sfile=file;
+	myFlexer Flexflexer(sfile);
 
-	// µ÷ÓÃ parser º¯Êý, parser º¯Êý»á½øÒ»²½µ÷ÓÃ lexer ½âÎöÊäÈëÎÄ¼þµÄ
+	// ï¿½ï¿½ï¿½ï¿½ parser ï¿½ï¿½ï¿½ï¿½, parser ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ lexer ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½
 	AST::CompUnit* Ast;
-	auto ret = yyparse(Ast);
+	auto ret = yyparse(Ast,Flexflexer);
 	assert(!ret);
 
-	// Êä³ö½âÎöµÃµ½µÄ AST, ÆäÊµ¾ÍÊÇ¸ö×Ö·û´®
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½ AST, ï¿½ï¿½Êµï¿½ï¿½ï¿½Ç¸ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
 	Ast->Dump();
 
 	Gen program_gen;

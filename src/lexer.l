@@ -1,27 +1,32 @@
 %option noyywrap
 %option nounput
 %option noinput
+%option yylineno
+%option c++
+%option yyclass="myFlexer"
 
 %{
-
 #include <cstdlib>
 #include <string>
-
-// 因为 Flex 会用到 Bison 中关于 token 的定义
-// 所以需要 include Bison 生成的头文件
+#include <cstring>
+#include <cstdio>
+#include "myFlexer.hpp"
 #include "parser.tab.hpp"
-using namespace std;
 
+#undef YY_DECL
+#define YY_DECL int myFlexer::yylex()
+using namespace std;
 %}
 
-/* 空白符和注释 */
+
+/* 锟秸白凤拷锟斤拷注锟斤拷 */
 WhiteSpace    [ \t\n\r]*
 LineComment   "//".*
 MultiLineComment    "/*"([^\*]|(\*)*[^\*/])*(\*)*"*/" 
 
-/* 标识符 */
+/* 锟斤拷识锟斤拷 */
 
-/* 整数字面量 */
+/* 锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷 */
 Decimal       [1-9][0-9]*
 Octal         0[0-7]*
 Hexadecimal   0[xX][0-9a-fA-F]+

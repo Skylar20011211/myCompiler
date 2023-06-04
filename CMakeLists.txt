@@ -17,9 +17,12 @@ message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
  add_flex_bison_dependency(Lexer Parser)
 
 # project include directories
-include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(/usr/include)
+include_directories(${PROJECT_SOURCE_DIR})
+include_directories(${PROJECT_SOURCE_DIR}/src)
+include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${LLVM_INCLUDE_DIRS})
+
 
 
 message("LLVM_INCLUDE_DIRS: ${LLVM_INCLUDE_DIRS}")
@@ -28,17 +31,15 @@ separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
 include_directories(${LLVM_INCLUDE_DIRS})
 
-add_definitions(-D_ITERATOR_DEBUG_LEVEL=0)
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-
 # all of C/C++ source files
 file(GLOB_RECURSE CXX_SOURCES "src/*.cpp" "src/.*hpp")
-set(SOURCES  ${CXX_SOURCES} 
-            ${FLEX_Lexer_OUTPUTS} ${BISON_Parser_OUTPUT_SOURCE})
-
+set(SOURCES  ${CXX_SOURCES} ${FLEX_Lexer_OUTPUTS} ${BISON_Parser_OUTPUT_SOURCE})
 # executable
 add_executable(compiler ${SOURCES})
-target_compile_options(compiler PRIVATE "/MD")
+
+set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
+set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O2 -Wall")
 
 llvm_map_components_to_libnames(llvm_libs ${LLVM_TARGETS_TO_BUILD} support core irreader codegen mc mcparser option)
 target_compile_features(compiler PRIVATE cxx_std_17)

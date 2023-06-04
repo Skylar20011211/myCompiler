@@ -3,20 +3,28 @@
   #include <string>
   #include "AST.hpp"
   #include <vector>
+  #include "myFlexer.hpp"
 }
 
 %{
+#define YYDEBUG 1
 #include <iostream>
 #include <memory>
 #include <string>
 #include "AST.hpp"
+#include"myFlexer.hpp"
+#define parser_class_name{myFlexer}
 
 int yylex();
-void yyerror(AST::CompUnit* &Ast, const char *s);
+void yyerror(AST::CompUnit* &Ast, myFlexer &Flexer,const char *s);
 using namespace std;
+
+#undef yylex
+#define yylex Flexer.yylex
 %}
 
 %parse-param { AST::CompUnit* &Ast }
+%parse-param { myFlexer &Flexer }
 
 %union {
   std::string* str_val;
@@ -327,7 +335,7 @@ LVal
 		auto ast=new AST::Variable();
 		ast->varName=$1;
 		ast->is_array=true;
-		ast->arr=$2;//ÕâÀï¼ÇÂ¼µÄÊÇË÷ÒýÎ»ÖÃ²»ÊÇÊý×ésize
+		ast->arr=$2;//ï¿½ï¿½ï¿½ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½size
 		ast->initValList=nullptr;
 		$$=ast;
 	}
@@ -553,6 +561,6 @@ LOrExp
 	;
 %%
 
-void yyerror(AST::CompUnit* &Ast , const char *s) {
+void yyerror(AST::CompUnit* &Ast ,myFlexer&Flexer,const char *s) {
   cerr << "error: " << s << endl;
 }

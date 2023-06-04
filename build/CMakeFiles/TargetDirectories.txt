@@ -1,0 +1,6 @@
+/home/skylar/myCompiler/build/CMakeFiles/intrinsics_gen.dir
+/home/skylar/myCompiler/build/CMakeFiles/omp_gen.dir
+/home/skylar/myCompiler/build/CMakeFiles/acc_gen.dir
+/home/skylar/myCompiler/build/CMakeFiles/compiler.dir
+/home/skylar/myCompiler/build/CMakeFiles/edit_cache.dir
+/home/skylar/myCompiler/build/CMakeFiles/rebuild_cache.dir

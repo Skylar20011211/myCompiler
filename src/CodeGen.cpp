@@ -81,7 +81,7 @@ void Gen::OutputGen() {
 	g_module->setDataLayout(TargetMachine->createDataLayout());
 	g_module->setTargetTriple(TargetTriple);
 	std::error_code EC;
-	llvm::raw_fd_ostream Dest("output.obj", EC, llvm::sys::fs::OF_None);
+	llvm::raw_fd_ostream Dest("output.o", EC, llvm::sys::fs::OF_None);
 	if (EC) {
 		throw std::runtime_error("Could not open file: " + EC.message());
 		return;
@@ -249,9 +249,13 @@ Value* Gen::ValueGen(AST::Exp* ast) {
 				exit(1);
 			}
 			if (g_var->second->getValueType()->isArrayTy()) {
-				auto index = GetArrayIndex(lexp);
-				Value* gep = g_ir_builder->CreateInBoundsGEP(g_var->second->getValueType()->getScalarType(), g_var->second, { index });
-				return g_ir_builder->CreateLoad(g_var->second->getValueType()->getScalarType(), gep);
+				auto id = GetArrayIndex(lexp);
+				vector<Value*> index;
+    			index.push_back(ConstantInt::get(*g_llvm_context, APInt(32, 0)));
+    			index.push_back(id);
+				basType ty=GetBType(g_var->second);
+				Value* gep = g_ir_builder->CreateInBoundsGEP(g_var->second->getValueType()->getScalarType(), g_var->second, index);
+				return g_ir_builder->CreateLoad(GetType(ty),gep);
 			}
 			else return g_ir_builder->CreateLoad(g_var->second->getValueType(), g_var->second);
 		}
@@ -338,9 +342,9 @@ void Gen::StmtGen(Function* func, AST::BlockItem* item, BasicBlock* loopBB, Basi
 
 //IfGen used in While
 void Gen::IfGen(Function* func, AST::IfStmt* ifStmt, BasicBlock* loopBB, BasicBlock* endLoopBB) {
-	BasicBlock* ThenBB = BasicBlock::Create(*g_llvm_context, "if", func);
-	BasicBlock* ElseBB = BasicBlock::Create(*g_llvm_context, "else", func);
-	BasicBlock* MergeBB = BasicBlock::Create(*g_llvm_context, "merge", func);
+	BasicBlock* ThenBB = BasicBlock::Create(*g_llvm_context, "ifBB", func);
+	BasicBlock* ElseBB = BasicBlock::Create(*g_llvm_context, "elseBB", func);
+	BasicBlock* MergeBB = BasicBlock::Create(*g_llvm_context, "mergeBB", func);
 
 	Value* cond = ValueGen(ifStmt->condition);
 	g_ir_builder->CreateCondBr(cond, ThenBB, ElseBB);
@@ -354,6 +358,7 @@ void Gen::IfGen(Function* func, AST::IfStmt* ifStmt, BasicBlock* loopBB, BasicBl
 	}
 	NamedValues.remove(removeList);
 	if (!break_sign) g_ir_builder->CreateBr(MergeBB);
+	else g_ir_builder->CreateBr(endLoopBB);
 
 	break_sign = false;
 	g_ir_builder->SetInsertPoint(ElseBB);
@@ -365,6 +370,7 @@ void Gen::IfGen(Function* func, AST::IfStmt* ifStmt, BasicBlock* loopBB, BasicBl
 		NamedValues.remove(removeList);
 	}
 	if (!break_sign) g_ir_builder->CreateBr(MergeBB);
+	else g_ir_builder->CreateBr(endLoopBB);
 	g_ir_builder->SetInsertPoint(MergeBB);
 }
 
@@ -400,19 +406,24 @@ void Gen::AssignGen(Function* func, AST::AssignStmt* assginStmt) {
 		}
 		if (GetBType(g_var->second) != GetBType(r)) {
 			if (GetBType(g_var->second) == Int) r = FloatToInt(r);
-			else r = IntToFloat(r);
+			else if(GetBType(g_var->second)==Float)r = IntToFloat(r);
 
 		}
 		if (g_var->second->getValueType()->isArrayTy()) {
-			auto index = GetArrayIndex(assginStmt->lVal);
-			g_ir_builder->CreateStore(r, g_ir_builder->CreateInBoundsGEP(g_var->second->getValueType()->getScalarType(), g_var->second, index));
+			AST::Variable* var=static_cast<AST::Variable*>(assginStmt->lVal);
+			Value* id=GetArrayIndex(var);
+			vector<Value*>index;
+			index.push_back(ConstantInt::get(*g_llvm_context, APInt(32, 0)));
+			index.push_back(id);
+ 		 	Value* arrayElementPtr = g_ir_builder->CreateInBoundsGEP(g_var->second->getValueType(),g_var->second, index);
+			g_ir_builder->CreateStore(r, arrayElementPtr);
 		}
 		else g_ir_builder->CreateStore(r, g_var->second);
 	}
 	else {
 		if (var->getAllocatedType() != r->getType()) {
 			if (var->getAllocatedType()->isIntegerTy())r = FloatToInt(r);
-			else r = IntToFloat(r);
+			else if(var->getAllocatedType()->isFloatTy()) r= IntToFloat(r);
 		}
 		if (assginStmt->lVal->is_array) {
 			Value* location = GetLocation(assginStmt->lVal, var);
@@ -600,8 +611,11 @@ Value* Gen::ScanfGen(AST::FuncCall* ast) {
 				}
 				auto global_var = global->second;
 				if (global_var->getValueType()->isArrayTy()) {
-					auto index = GetArrayIndex(VarUnit);
-					Value* ptr = g_ir_builder->CreateInBoundsGEP(global_var->getValueType()->getScalarType(), global_var, index);
+					auto id = GetArrayIndex(VarUnit);
+					vector<Value*>index;
+					index.push_back(ConstantInt::get(*g_llvm_context, APInt(32, 0)));
+					index.push_back(id);
+					Value* ptr = g_ir_builder->CreateInBoundsGEP(global_var->getValueType(), global_var, index);
 					ArgValues.push_back(ptr);
 				}
 				else

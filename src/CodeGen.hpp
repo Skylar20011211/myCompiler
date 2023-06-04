@@ -36,15 +36,15 @@ using namespace llvm;
 
 class Gen {
 public:
-	// 记录了LLVM的核心数据结构，比如类型和常量表，不过我们不太需要关心它的内部
+	// 锟斤拷录锟斤拷LLVM锟侥猴拷锟斤拷锟斤拷锟捷结构锟斤拷锟斤拷锟斤拷锟斤拷锟酵和筹拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟角诧拷太锟斤拷要锟斤拷锟斤拷锟斤拷锟斤拷锟节诧拷
 	LLVMContext* g_llvm_context;
-	// 用于创建LLVM指令
+	// 锟斤拷锟节达拷锟斤拷LLVM指锟斤拷
 	IRBuilder<>* g_ir_builder;
-	// 用于管理函数和全局变量，可以粗浅地理解为类c++的编译单元(单个cpp文件)
+	// 锟斤拷锟节癸拷锟斤拷锟斤拷锟斤拷锟斤拷全锟街憋拷锟斤拷锟斤拷锟斤拷锟皆达拷浅锟斤拷锟斤拷锟斤拷为锟斤拷c++锟侥憋拷锟诫单元(锟斤拷锟斤拷cpp锟侥硷拷)
 	Module* g_module;
 	SymbolTable NamedValues;
 	std::unique_ptr<legacy::FunctionPassManager> TheFPM;
-	// 用于记录函数的变量参数
+	// 锟斤拷锟节硷拷录锟斤拷锟斤拷锟侥憋拷锟斤拷锟斤拷锟斤拷
 	std::map<std::string, GlobalVariable*> g_values;
 	Gen();
 	void CompUnitGen(AST::CompUnit*& ast);
