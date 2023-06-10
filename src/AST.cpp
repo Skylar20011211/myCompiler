@@ -1,6 +1,8 @@
 #include "AST.hpp"
 #include <string>
+#include <fstream>
 using namespace std;
+
 const char* typeNames[]{
 	"Int",
 	"Float",
@@ -20,10 +22,12 @@ const char* expTypeNames[]{
 std::string space1(4, ' ');
 std::string space2(8, ' ');
 std::string space3(12, ' ');
-
-
+std::fstream ofs;
 
 void AST::CompUnit::Dump()const {
+    ofs.open("visual.json", ios::out);
+	ofs << "{\"name\":\"Program\"," <<endl;
+	ofs << "\"children\":[" <<endl;
 	for (const auto& Unit :units) {
 		if (Unit->unitType == VarDeclare) {
 			Variable* ptr = static_cast<Variable*>(Unit);
@@ -34,61 +38,86 @@ void AST::CompUnit::Dump()const {
 			ptr->Dump();
 		}
 	}
+	ofs << "]}" <<endl;
+	ofs.close();
 }
 
 void AST::Variable::Dump()const {
-	cout << "Variable: "<<typeNames[bType];
+	ofs << "{\"name\":\"Variable:" << typeNames[bType] << "\"," << endl;
+	ofs << "\"children\":[" <<endl;
 	if (!is_array) {
-		cout << " Ident:" << *varName;
+		ofs << "{\"name\":\"Ident:" << *varName << "\"";
 		if (initValList) {
-			cout << "= InitVal:";
+			ofs <<","<<endl;
+			ofs << "\"children\":[";
+			ofs << "{\"name\":\"= InitVal\"," <<endl;
+			ofs << "\"children\":[" <<endl;
 			std::vector<AST::Exp*>::iterator it = initValList->valList.begin();
 			(*it)->Dump();
+			ofs << "]";
+			ofs << "}" <<endl;
+			ofs << "]";
 		}
+		ofs << "}" <<endl;
 	}
 	else {
-		cout << " Ident:" << *varName;
+		ofs << "{\"name\":\"ArrayIdent:" << *varName << "\"," <<endl;
+		ofs << "\"children\":[" <<endl;
 		for (std::size_t i = 0; i < arr->len.size(); ++i) {
-			cout << '[';
 				arr->len[i]->Dump();
-				cout << ']';
 		}
+		ofs << "]";
+		ofs << "}," << endl;
 		if (initValList) {
-			cout << "= InitVal:{";
+			ofs << "{\"name\":\"= InitVal\"," << endl;
+			ofs << "\"children\":[" <<endl;
 			for (const auto& initVal : initValList->valList) {
-					cout << static_cast<AST::ConstNumber*>(initVal)->val;
+					ofs << static_cast<AST::ConstNumber*>(initVal)->val;
 			}
-			cout << "}";
+			ofs << "]";
+			ofs << "},"  <<endl;
 		}
 	}	
+	ofs << "]}," <<endl;
 }
 
 void AST::Func::Dump() const {
-	cout << "FuncDef:{" << endl;
-	cout << space1<<"FuncType:" << typeNames[funcType] << endl;
-	cout << space1<<"Ident:" << *funcName << endl;
-	cout << space1<<"FuncFParams:" << endl;
+	ofs << "{"<<endl;
+	ofs << "\"name\":\"FuncDef\"," << endl;
+	ofs <<"\"children\":["<<endl;
+	ofs << "{\"name\":\""<< typeNames[funcType] <<"\"},"<< endl;
+	ofs << "{\"name\":\""<< *funcName <<"\"},"<< endl;
 	if (argList) {
+		ofs << "{\"name\":\"FuncFParams\","<<endl;
+		ofs<<"\"children\":["<<endl;
 		for (std::size_t i = 0; i < argList->args.size(); ++i) {
-			cout << space2 << "FuncFParam: ";
+			ofs<<"{\"name\":\"";
 			argList->args[i]->Dump();
-			cout << endl;
+			ofs<<"\"},";
+			ofs << endl;
 		}
+		ofs<<"{\"name\":\"void\"}"<<endl;
+		ofs<<"]";
+		ofs<<"},"<<endl;
 	}
-	cout << space1<<"Block:" << endl;
+	ofs <<"{\"name\":\"Block\"," << endl;
+	ofs<<"\"children\":["<<endl;
 	for (const auto& item : funcBody->itemList) {
-		cout << space2;
+		ofs << space2;
 		item->Dump();
-		cout << endl;
+		ofs << endl;
 	}
-	cout << "}"<<endl;
+	ofs<<"]";
+	ofs<<"}"<<endl;
+	ofs<< "]";
+	ofs << "},"<<endl;
 }
 
 void AST::Arg::Dump()const {
 	if (is_pointer) {
-		cout << "ArgType:"<<typeNames[bType] << " Ident:" << *(this->argName) << "[]";
+		ofs<<typeNames[bType];
 	}
-	else cout << "ArgType:"<<typeNames[bType] << " Ident:" << *argName;
+	else ofs <<typeNames[bType];
 }
 
 void AST::BlockItem::Dump()const {
@@ -103,7 +132,7 @@ void AST::BlockItem::Dump()const {
 }
 
 void AST::Stmt::Dump()const {
-	cout << "StmtType:"<<stmtTypeNames[stmtType]<<endl;
+	ofs << "{\"name\":\"StmtType:" << stmtTypeNames[stmtType] <<"\"},"<<endl;
 	switch (this->stmtType) {
 	case assignStmt: static_cast<AssignStmt*>(const_cast<Stmt*>(this))->Dump(); break;
 	case ifStmt:  static_cast<IfStmt*>(const_cast<Stmt*>(this))->Dump(); break;
@@ -111,57 +140,81 @@ void AST::Stmt::Dump()const {
 	case returnStmt:  static_cast<ReturnStmt*>(const_cast<Stmt*>(this)) ->Dump(); break;
 	case blockStmt:
 		for (const auto& item : static_cast<Block*>(const_cast<Stmt*>(this))->itemList) {
-			cout << space2;
+			ofs << space2;
 			item->Dump();
-			cout << endl;
+			ofs << endl;
 		}
 	}
 }
 
 void AST::AssignStmt::Dump()const {
-	cout << "LVal: ";
+	ofs << "{\"name\":\"AssignStmt\"," <<endl;
+	ofs << "\"children\":[" << endl;
+	ofs << "{\"name\":\"LVal\"," << endl;
+	ofs << "\"children\":[" << endl;
 	lVal->Dump();
-	cout << endl;
-	cout << "Exp: " << endl;
-	cout << space1;
+	ofs << "]";
+	ofs << "}," << endl; 
+	ofs << "{\"name\":\"Exp\"," << endl;
+	ofs << "\"children\":[" << endl;
 	rVal->Dump();
-	cout << endl;
+	ofs << "]";
+	ofs << "}" << endl;
+	ofs << "]";
+	ofs << "}," << endl; 
 }
 
 void AST::IfStmt::Dump()const {
-	cout << "Cond:" << endl;
-	cout << space1;
+	ofs << "{\"name\":\"IfStmt\"," << endl;
+	ofs << "\"children\":[" <<endl;
+	ofs << "{\"name\":\"IfCond\"," <<endl;
+	ofs << "\"children\":[" <<endl;
 	condition->Dump();
-	cout << "IfBlock:"<<endl;
-	cout << space1;
+	ofs << "]";
+	ofs << "}," <<endl;
+	ofs << "{\"name\":\"IfBlock\"," <<endl;
+	ofs << "\"children\":[" <<endl;
 	ifBlock->Dump();
+	ofs << "]";
+	ofs << "}," <<endl;
+
 	if (elseBlock) {
-		cout << "ElseBlock:" << endl;
-		cout << space1;
+		ofs << "{\"name\":\"elseBlock\"," <<endl;
+		ofs << "\"children\":[" <<endl;
 		elseBlock->Dump();
+		ofs << "]";
+		ofs << "}" <<endl;
 	}
-	cout << endl;
+	ofs << "]}," <<endl;
 }
 
 void AST::WhileStmt::Dump()const {
-	cout << "Cond:" << endl;
-	cout << space1;
+	ofs << "{\"name\":\"WhileStmt\","<<endl;
+	ofs << "\"children\":[" <<endl;
+	ofs << "{\"name\":\"WhileCond\"," <<endl;
+	ofs << "\"children\":[" <<endl;
 	condition->Dump();
-	cout << "LoopStmt:"<<endl;
-	cout << space1;
+	ofs << "]";
+	ofs << "}," <<endl;
+	ofs << "{\"name\":\"LoopStmt\"," <<endl;
+	ofs << "\"children\":[" <<endl;
 	loopBlock->Dump();
-	cout << endl;
+	ofs << "]";
+	ofs << "}" <<endl;
+	ofs << "]}," <<endl;
 }
 
 void AST::ReturnStmt::Dump()const {
-	cout << "StmtType:" << stmtTypeNames[stmtType] << endl;
-	cout << space2<<"RetVal:" << endl;
+	ofs << "{\"name\":\"StmtType:" << stmtTypeNames[stmtType] <<"\"},"<<endl;
+	ofs << "{\"name\":\"RetVal\"," << endl;
+	ofs << "\"children\":[" <<endl;
 	retVal->Dump();
-	cout << endl;
+	ofs << "]";
+	ofs << "}"<<endl;
 }
 
 void AST::Exp::Dump()const {
-	cout << expTypeNames[expType] << endl;
+	ofs << expTypeNames[expType] << endl;
 	switch (this->expType) {
 	case finalExp:static_cast<FinalExp*>(const_cast<Exp*>(this))->Dump(); break;
 	case lValExp: static_cast<Variable*>(const_cast<Exp*>(this))->Dump(); break;
@@ -173,42 +226,44 @@ void AST::Exp::Dump()const {
 }
 
 void AST::ConstNumber::Dump()const {
-	cout << "BType:" << typeNames[constType] << endl;
-	cout << "Val:" << val << endl;
-	cout << endl;
+	ofs << "{\"name\":\"BType:" << typeNames[constType] << "\"," << endl;
+	ofs << "\"children\":[" <<endl;
+	ofs << "{\"name\":\"Val:" << val << "\"}" << endl;
+	ofs << "]";
+	ofs << "},"<<endl;
 }
 
 void AST::FinalExp::Dump()const {
-	cout << "IExp:" << endl;
-	cout << space1;
+	ofs << "{\"name\":\"IExp\"," <<endl;
+	ofs << "\"children\":[" <<endl;
 	iExp->Dump();
-	cout << endl;
+	ofs << "]";
+	ofs << "}," <<endl;
 }
 
 void AST::BinaryExp::Dump()const {
-	cout << "LExp:" << endl;
-	cout << space1;
+	ofs << "{\"name\":\"LExp\"," <<endl;
+	ofs << "\"children\":[" <<endl;
 	lExp->Dump();
-	cout << "RExp:" << endl;
-	cout << space1;
-	rExp->Dump();
-	cout << endl;
-}
+	ofs << "]";
+	ofs << "}," <<endl;
 
+	ofs << "{\"name\":\"RExp\"," <<endl;
+	ofs << "\"children\":[" <<endl;
+	rExp->Dump();
+	ofs << "]";
+	ofs << "}," <<endl;
+}
 
 void AST::FuncCall::Dump()const {
-	cout << "Ident:";
-	cout << *funcName << endl;
+	ofs <<"{\"name\":\"Ident:"<<*funcName<<"\"},"<<endl;
 	if (realArgList) {
+		ofs<<"{\"name\":\"FuncRParams\","<<endl;
+		ofs<<"\"children\":["<<endl;
 		for (const auto& arg : realArgList->realArgs) {
-			cout << "FuncRParams:" << endl;
-			cout << space1 << "FuncRParam:";
 			arg->Dump();
 		}
+        ofs<<"]},"<<endl;
 	}
-	
-	cout << endl;
+	ofs << endl;
 }
-
-
-
