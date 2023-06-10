@@ -9,17 +9,17 @@
 
 输入命令：    
 
-sudo apt-get update && sudo apt-get upgrade && sudo apt-get install flex bison    
+    sudo apt-get update && sudo apt-get upgrade && sudo apt-get install flex bison    
 
 安装flex和bison    
 
-sudo apt-get install llvm-14    
+    sudo apt-get install llvm-14    
 
 安装LLVM    
 
-sudo apt install gcc g++ gdb clang    
+    sudo apt install gcc g++ gdb clang    
 
-sudo apt install zlib1g-dev    
+    sudo apt install zlib1g-dev    
 
 安装c语言编译环境    
 
@@ -41,37 +41,39 @@ readme.md
 
 请删除整个build文件夹  
 
-rm -rf build  
+    rm -rf build  
 
 然后创建新的build文件夹，并进入build  
 
-mkdir build  
+    mkdir build  
 
-cd build  
+    cd build  
 
 执行cmake命令和make命令  
 
-cmake ..  
+    cmake ..  
 
-make  
+    make  
 
 举例，你要测试hello.c,需要先把hello.c放进build文件夹中（这一步可以在Ubuntu中使用cp命令完成，也可以直接鼠标操作）这一步完成之后你可以在build文件夹中找到名为compiler的文件   
 
 然后在build文件夹中继续输入命令  
 
-./compiler hello.c  
+    ./compiler hello.c  
 
 这一步完成之后compiler⽣成output.o⽂件  
 
 之后使用g++进行编译  
 
-g++ output.o -no-pie -o program  
+    g++ output.o -no-pie -o program    
+    
+    ./program   
 
 也可以使用clang（需要先安装clang）  
 
-clang-14 output.o -no-pie -o program  
+    clang-14 output.o -no-pie -o program  
 
-./program  
+    ./program  
 
 以上步骤完成之后就可以看见运行的结果：打印出hello world  
 
@@ -79,7 +81,7 @@ clang-14 output.o -no-pie -o program
 
 （即：  
 
- ；     
+     ；     
  
     //获取节点数组和连线数组  
     
