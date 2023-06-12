@@ -48,31 +48,7 @@
 			.projection(d => [d.y, d.x])
 		//请求数据
                 
-		var root = {"name":"Program",
-"children":[
-{
-"name":"FuncDef",
-"children":[
-{"name":"Int"},
-{"name":"main"},
-{"name":"Block",
-"children":[
-        {"name":"Ident:printf"},
-
-
-        {"name":"StmtType:returnStmt"},
-{"name":"RetVal",
-"children":[
-{"name":"BType:Int",
-"children":[
-{"name":"Val:0"}
-]},
-]}
-
-]}
-]},
-]}
-;
+		var root = ${ASTTreeVisualization};
 		//获取节点数组和连线数组
 		var nodes = tree.nodes(root)//获取所有节点信息
 		var links = tree.links(nodes)//获取节点的连线信息集合
