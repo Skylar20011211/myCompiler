@@ -9,7 +9,7 @@
 #include"myFlexer.hpp"
 
 using namespace std;
-
+void ASTVisual();
 // ���� lexer ������, �Լ� parser ����
 // Ϊʲô������ sysy.tab.hpp ��? ��Ϊ��������û�� yyin �Ķ���
 // ���, ��Ϊ����ļ����������Լ�д��, ���Ǳ� Bison ���ɳ�����
@@ -47,5 +47,26 @@ int main(int argc, const char* argv[]) {
 
 	Gen program_gen;
 	program_gen.CompUnitGen(Ast);
+	
+	ASTVisual();
+}   
+
+void ASTVisual()
+{
+	ifstream in("visual.json", ios::in);
+	istreambuf_iterator<char> beg(in), end;
+	string strdata(beg, end);
+	in.close();
+
+	std::ifstream hin("books.html"); 
+        std::ostringstream tmp; 
+        tmp << hin.rdbuf(); 
+        std::string strhtml = tmp.str();
+
+	std::string Target = "${ASTTreeVisualization}";
+	auto Pos = strhtml.find(Target);
+	strhtml.replace(Pos, Target.length(), strdata.c_str());
+	std::ofstream HTMLFile("ASTvisual.html");
+	HTMLFile << strhtml;
 }
 
