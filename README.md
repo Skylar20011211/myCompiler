@@ -43,7 +43,7 @@ readme.md
 
     rm -rf build  
 
-然后创建新的build文件夹，并进入build  
+然后创建新的build文件夹，请将src目录下的books.html文件复制到build目录下（为了之后的可视化），并进入build  
 
     mkdir build  
 
@@ -77,23 +77,4 @@ readme.md
 
 以上步骤完成之后就可以看见运行的结果：打印出hello world  
 
-如果想看到html格式的可视化AST，请将build目录下的visual.json文件中的所有内容复制，然后粘贴到book.html(在src文件夹中)的第51行中，用以替代第51行 var root = 之后直到第一个分号（；）之前的内容  
-
-（即：  
-
-     ；     
- 
-    //获取节点数组和连线数组  
-    
-		var nodes = tree.nodes(root)//获取所有节点信息  
-		
- 之前）  
- 
-替换效果如下：  
-
-![image](https://github.com/Skylar20011211/myCompiler/assets/132972130/a0f42452-86a2-4cd4-8843-f41f0e58a71a)  
-
-其中画出的部分就是需要替代的内容，如果想了解详细内容，请百度搜索json文件格式和html相关知识。  
-
-保存之后，再用浏览器打开book.html文件（也就是在文件资源管理器中双击该文件，会默认用浏览器打开），此时即可看到测试文件的可视化AST。  
-
+如果想看到html格式的可视化AST，请打开build目录下生成的ASTVisual.html并保证网络连接正常。
